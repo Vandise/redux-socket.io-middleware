@@ -5,18 +5,20 @@ export const defaultOpts = {
 };
 
 export const defaultSocketEvents = [
-  connect: {
+  {
     action: 'NOOP',
     dispatch: (socket, store, action) => {
-      console.debug('NOOP event called. Have you implemented your events?');
+      console.error('NOOP Called.');
     }, 
   },
 ];
 
-export const onSocketEvents = (event, data) => {
-  console.error('Socket not listening for any events.');
+export const onSocketEvents = (socket, store) => (event, data) => {
+  console.error('Not yet implemented, recieved:',
+    event,
+    ' event with params:',
+    data);
 };
-
 
 export const socketIOMiddleware = (
   initialSocket = null,
@@ -26,40 +28,33 @@ export const socketIOMiddleware = (
   options = defaultOpts) => {
 
   let socket = initialSocket;
-  const onEvent = (socket, store) => listenEvents;
+  const defaultEvents = dispatchEvents;
 
   return store => next => action => {
-
     if (action.type === connectAction) {
       const connStr = `${action.payload.host}:${action.payload.port}`;
       if (socket !== null) {
         socket.close();
       }
-      
-      socket = io.connect(connStr, opts);
-      
+    
+      socket = io.connect(connStr, options);
+
       const onevent = socket.onevent;
       socket.onevent = (packet) => {
         const args = packet.data || [];
         packet.data = ['*'].concat(args);
         onevent.call(socket, packet);
       };
-      
-      socket.on('*', onEvent(socket, store));
+    
+      socket.on('*', listenEvents(socket, store));
 
-      return next(action);
+    } else {
+      defaultEvents.map((event) => {
+        if (action.type === event.action) {
+          return event.dispatch(socket, store, action);
+        }
+      });
     }
-
-    if (!socket.connected) {
-      throw new Error('Socket must call a connect event before dispatching any actions.');
-    }
-
-    defaultEvents.map((event) => {
-      if (action.type === event.action) {
-        return event.dispatch(socket, store, action);
-      }
-    });
-
     return next(action);
   };
 };
