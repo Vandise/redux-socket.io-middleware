@@ -5,7 +5,7 @@ export const defaultOpts = {
 };
 
 export const defaultSocketEvents = [
-  connect: {
+  {
     action: 'NOOP',
     dispatch: (socket, store, action) => {
       console.debug('NOOP event called. Have you implemented your events?');
@@ -26,7 +26,7 @@ export const socketIOMiddleware = (
   options = defaultOpts) => {
 
   let socket = initialSocket;
-  const onEvent = (socket, store) => listenEvents;
+  const onEvent = (socket, store, next, action) => listenEvents;
 
   return store => next => action => {
 
@@ -45,7 +45,7 @@ export const socketIOMiddleware = (
         onevent.call(socket, packet);
       };
       
-      socket.on('*', onEvent(socket, store));
+      socket.on('*', onEvent(socket, store, next, action));
 
       return next(action);
     }
