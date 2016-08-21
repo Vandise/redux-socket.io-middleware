@@ -36,7 +36,7 @@ export const socketIOMiddleware = (
         socket.close();
       }
       
-      socket = io.connect(connStr, opts);
+      socket = io.connect(connStr, options);
       
       const onevent = socket.onevent;
       socket.onevent = (packet) => {
