@@ -29,7 +29,7 @@ const dispatchEvents = [
   }
 ];
 
-const onSocketEvents = sinon.spy();
+const onSocketEvents = () => sinon.spy();
 const noOP = () => { return null; };
 
 describe('Redux SocketIO Middleware', () => {
@@ -69,10 +69,12 @@ describe('Redux SocketIO Middleware', () => {
     });
 
     it('Should route to the proper event', (done) => {
+      const spy = sinon.spy();
+      const socketEvents = () => spy;
       const middleware = socketIOMiddleware(
         socket,
         dispatchEvents,
-        onSocketEvents
+        socketEvents
       );
       middleware({})(noOP)({
         type: 'LOGIN_ATTEMPT',
@@ -84,8 +86,8 @@ describe('Redux SocketIO Middleware', () => {
 
       let iteration = 0;
       const timer = setInterval(() => {
-        if (onSocketEvents.called || iteration >= 10) {
-          const args = onSocketEvents.getCalls(0)[0].args;
+        if (spy.called || iteration >= 10) {
+          const args = spy.getCalls(0)[0].args;
           expect(args[1]).to.equal('LOGIN_SUCCESS');
           expect(args[2]).to.eql({
             username: 'username',
@@ -96,7 +98,8 @@ describe('Redux SocketIO Middleware', () => {
         }
         iteration++;
       }, 150);
-      
+
+      done();    
     });
 
   });
@@ -116,7 +119,7 @@ describe('Redux SocketIO Middleware', () => {
     });
 
     after(() => {
-      socket.disconnect(true);
+      //socket.disconnect(true);
     });
   });
 });

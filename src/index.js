@@ -7,25 +7,25 @@ export const defaultOpts = {
 export const initialStateEvents = [
   {
     action: 'connecting',
-    dispatch: (socket) => {
+    dispatch: (store, next, action) => (socket) => {
       console.log('Socket is connecting.');
     }
   },
   {
     action: 'connect',
-    dispatch: (socket) => {
+    dispatch: (store, next, action) => (socket) => {
       console.log('Socket connected.');
     }
   },
   {
     action: 'disconnect',
-    dispatch: (socket) => {
+    dispatch: (store, next, action) => (socket) => {
       console.log('Socket disconnected.');
     }
   },
   {
     action: 'reconnecting',
-    dispatch: (socket) => {
+    dispatch: (store, next, action) => (socket) => {
       console.log('Socket reconnecting.');
     }
   }
@@ -40,7 +40,7 @@ export const defaultSocketEvents = [
   },
 ];
 
-export const onSocketEvents = (event, data) => {
+export const onSocketEvents = (socket, store, next, action) => (event, data) => {
   console.error('Socket not listening for any events.');
 };
 
@@ -54,10 +54,9 @@ export const socketIOMiddleware = (
   options = defaultOpts) => {
 
   let socket = initialSocket;
-  const onEvent = (socket, store, next, action) => listenEvents;
+  const onEvent = listenEvents;
 
   return store => next => action => {
-
     if (action.type === connectAction || socket != null) {
       let nextAction = false;
       if (socket === null) {
@@ -79,7 +78,7 @@ export const socketIOMiddleware = (
       
       socket.on('*', onEvent(socket, store, next, action));
       stateEvents.map((evt) => {
-        let eventAction = (store, next, action) => evt.dispatch;
+        let eventAction = evt.dispatch;
         socket.on(evt.action.toString(), eventAction(
           store,
           next,
@@ -92,15 +91,17 @@ export const socketIOMiddleware = (
       }
     }
 
-    if (!socket.connected) {
-      throw new Error('Socket must call a connect event before dispatching any actions.');
-    }
-
-    dispatchEvents.map((event) => {
-      if (action.type === event.action) {
-        return event.dispatch(socket, store, action);
+    if (socket != null) {
+      if (!socket.connected) {
+        throw new Error('Socket must call a connect event before dispatching any actions.');
       }
-    });
+  
+      dispatchEvents.map((event) => {
+        if (action.type === event.action) {
+          return event.dispatch(socket, store, action);
+        }
+      });
+    }
 
     return next(action);
   };
