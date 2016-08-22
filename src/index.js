@@ -54,7 +54,7 @@ export const socketIOMiddleware = (
       throw new Error('Socket must call a connect event before dispatching any actions.');
     }
 
-    defaultEvents.map((event) => {
+    dispatchEvents.map((event) => {
       if (action.type === event.action) {
         return event.dispatch(socket, store, action);
       }
