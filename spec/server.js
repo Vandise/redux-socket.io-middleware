@@ -13,6 +13,7 @@ if (!module.parent) {
   socketio.listen(server).on('connection', function (socket) {
     console.log('Socket connected');
     socket.on('LOGIN_ATTEMPT', function(user) {
+      console.log('Emitting event LOGIN_SUCCESS');
       socket.emit('LOGIN_SUCCESS', user);
     });
   });

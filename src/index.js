@@ -30,14 +30,15 @@ export const socketIOMiddleware = (
 
   return store => next => action => {
 
-    if (action.type === connectAction) {
-      const connStr = `${action.payload.host}:${action.payload.port}`;
-      if (socket !== null) {
-        socket.close();
+    if (action.type === connectAction || socket != null) {
+      if (socket === null) {
+        const connStr = `${action.payload.host}:${action.payload.port}`;
+        if (socket !== null) {
+          socket.close();
+        }
+        
+        socket = io.connect(connStr, options);
       }
-      
-      socket = io.connect(connStr, options);
-      
       const onevent = socket.onevent;
       socket.onevent = (packet) => {
         const args = packet.data || [];
@@ -47,7 +48,6 @@ export const socketIOMiddleware = (
       
       socket.on('*', onEvent(socket, store, next, action));
 
-      return next(action);
     }
 
     if (!socket.connected) {
