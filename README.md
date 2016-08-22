@@ -3,8 +3,9 @@ An implementation of a generic socket.io middleware.
 
 ## Introduction
 This is an opinionated implementation of how redux should work with sockets. The philosophy is simple: only the middleware should have
-knowledge of the socket and the connection. Messages from the client should be sent by dispatching actions to the store and messages from
-the server should be dispatched as actions once recieved.
+knowledge of the socket and the connection. Messages from the client should be sent by dispatching actions to the store and messages from the server should be dispatched as actions once recieved. This middleware is intended to be used for applications with
+multiple socket connections since it adds a small layer of complexity to an application that would utilize a single socket. However,
+if you would like to utilize a single socket and this middleware, I would suggest reading the practices section.
 
 ## Dispatching messages from the client
 Like all sockets, we begin by setting up a connection. In redux we need to specify an action to establish the connection from the client
@@ -94,6 +95,15 @@ const store = createStore(reducers, compose(
 
 store.dispatch(actions.CONNECT('http://127.0.0.1','44500'));
 ```
+
+## Practices
+This middleware is intended to work with applications that have to maintain multiple socket connections. Games and their various
+states are an excellent example. When maintaining multiple socket connections, it's easy to see how your entry file can get clobbered
+and messy when setting up this middleware to work with redux. To make the application well structured, I've found creating a file
+in the middleware directory that acts as a setup file for this middleware to be the more successful approach. You are then able to break up and group your client-server dispatch events and server-client events.
+
+## Contributing
+Send a pull request with a description of the change. PR's will be ignored without supporting tests.
 
 ## License
 GPL v3.0
