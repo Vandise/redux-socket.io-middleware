@@ -100,4 +100,23 @@ describe('Redux SocketIO Middleware', () => {
     });
 
   });
+
+  describe('No initial socket connect', () => {
+    it('Should dispatch the next action on connect', () => {
+      const middleware = socketIOMiddleware();
+      const nextAction = sinon.spy();
+      middleware({})(nextAction)({
+        type: 'CONNECT',
+        payload: {
+          host: 'http://0.0.0.0',
+          port: '44501'
+        }
+      });
+      expect(nextAction.calledOnce).to.equal(true);
+    });
+
+    after(() => {
+      socket.disconnect(true);
+    });
+  });
 });

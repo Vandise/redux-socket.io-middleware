@@ -4,6 +4,33 @@ export const defaultOpts = {
   transports: ['websocket'],
 };
 
+export const initialStateEvents = [
+  {
+    action: 'connecting',
+    dispatch: (socket) => {
+      console.log('Socket is connecting.');
+    }
+  },
+  {
+    action: 'connect',
+    dispatch: (socket) => {
+      console.log('Socket connected.');
+    }
+  },
+  {
+    action: 'disconnect',
+    dispatch: (socket) => {
+      console.log('Socket disconnected.');
+    }
+  },
+  {
+    action: 'reconnecting',
+    dispatch: (socket) => {
+      console.log('Socket reconnecting.');
+    }
+  }
+];
+
 export const defaultSocketEvents = [
   {
     action: 'NOOP',
@@ -22,6 +49,7 @@ export const socketIOMiddleware = (
   initialSocket = null,
   dispatchEvents = defaultSocketEvents,
   listenEvents = onSocketEvents,
+  stateEvents = initialStateEvents,
   connectAction = 'CONNECT',
   options = defaultOpts) => {
 
@@ -31,7 +59,9 @@ export const socketIOMiddleware = (
   return store => next => action => {
 
     if (action.type === connectAction || socket != null) {
+      let nextAction = false;
       if (socket === null) {
+        nextAction = true;
         const connStr = `${action.payload.host}:${action.payload.port}`;
         if (socket !== null) {
           socket.close();
@@ -39,6 +69,7 @@ export const socketIOMiddleware = (
         
         socket = io.connect(connStr, options);
       }
+
       const onevent = socket.onevent;
       socket.onevent = (packet) => {
         const args = packet.data || [];
@@ -47,7 +78,18 @@ export const socketIOMiddleware = (
       };
       
       socket.on('*', onEvent(socket, store, next, action));
+      stateEvents.map((evt) => {
+        let eventAction = (store, next, action) => evt.dispatch;
+        socket.on(evt.action.toString(), eventAction(
+          store,
+          next,
+          action
+        ));
+      });
 
+      if (nextAction) {
+        return next(action);
+      }
     }
 
     if (!socket.connected) {
