@@ -46,7 +46,7 @@ To capture events sent from the server, the middleware expects a function to be 
 The event is the event name emitted from the server, and the data is the data sent with the message. Four other parameters are exposed
 in this function: the current socket (socket), the store (store), the next function (next), and the action (action).
 ```javascript
-const onSocketEvents = (event, data) => {
+const onSocketEvents = (socket, store, next, action) => (event, data) => {
   if (event === 'SOME_EMITTED_EVENT') {
     store.dispatch(actions.SOME_ACTION(parameters));
   }
@@ -61,7 +61,7 @@ import { createStore, applyMiddleware, combineReducers, compose } from 'redux';
 import thunk from 'redux-thunk';
 import { socketIOMiddleware } from 'redux-socket.io-middleware';
 ...
-const onSocketEvents = (event, data) => {
+const onSocketEvents = (socket, store, next, action) => (event, data) => {
   if (event === 'SOME_EMITTED_EVENT') {
     store.dispatch(actions.SOME_ACTION(parameters));
   }
@@ -77,11 +77,21 @@ const dispatchEvents = [
   }
 ];
 
+const stateEvents = [
+  {
+    action: 'connect',
+    dispatch: (store, next, action) => (socket) => {
+      // do something here
+    },
+  }
+];
+
 const middleware = socketIOMiddleware(
   null,             // initial socket, one will be created on CONNECT
   dispatchEvents,   // actions to capture to dispatch to the server
   onSocketEvents    // actions to capture from the server to update the store
   'CONNECT',        // conncetion action, default = CONNECT
+  stateEvents,      // connection state events, connecting, connect, disconnect, etc.
   {},               // SocketIO socket options, transports, etc.
 );
 
