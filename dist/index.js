@@ -5,8 +5,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.socketIOMiddleware = exports.onSocketEvents = exports.defaultSocketEvents = exports.initialStateEvents = exports.defaultOpts = undefined;
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var _socket = require('socket.io-client');
 
 var _socket2 = _interopRequireDefault(_socket);
@@ -60,6 +58,8 @@ var onSocketEvents = exports.onSocketEvents = function onSocketEvents(socket, st
   };
 };
 
+var initializedSocket = [];
+
 var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddleware() {
   var initialSocket = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
   var dispatchEvents = arguments.length <= 1 || arguments[1] === undefined ? defaultSocketEvents : arguments[1];
@@ -71,12 +71,13 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
 
   var socket = initialSocket;
   var onEvent = listenEvents;
+  initializedSocket[connectAction] = false;
 
   return function (store) {
     return function (next) {
       return function (action) {
-        if (action.type === connectAction || socket != null) {
-          var _ret = function () {
+        if (action.type === connectAction && !initializedSocket[connectAction]) {
+          (function () {
             var nextAction = false;
             if (socket === null) {
               nextAction = true;
@@ -100,22 +101,11 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
               var eventAction = evt.dispatch;
               socket.on(evt.action.toString(), eventAction(store, next, action));
             });
-
-            if (nextAction) {
-              return {
-                v: next(action)
-              };
-            }
-          }();
-
-          if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+            initializedSocket[connectAction] = true;
+          })();
         }
 
         if (socket != null) {
-          if (!socket.connected) {
-            throw new Error('Socket must call a connect event before dispatching any actions.');
-          }
-
           dispatchEvents.map(function (event) {
             if (action.type === event.action) {
               return event.dispatch(socket, store, action);
