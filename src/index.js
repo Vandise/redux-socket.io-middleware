@@ -44,6 +44,7 @@ export const onSocketEvents = (socket, store, next, action) => (event, data) => 
   console.error('Socket not listening for any events.');
 };
 
+let initializedSocket = [];
 
 export const socketIOMiddleware = (
   initialSocket = null,
@@ -55,9 +56,10 @@ export const socketIOMiddleware = (
 
   let socket = initialSocket;
   const onEvent = listenEvents;
+  initializedSocket[connectAction] = false;
 
   return store => next => action => {
-    if (action.type === connectAction || socket != null) {
+    if (action.type === connectAction && !initializedSocket[connectAction]) {
       let nextAction = false;
       if (socket === null) {
         nextAction = true;
@@ -67,6 +69,7 @@ export const socketIOMiddleware = (
         }
         
         socket = io.connect(connStr, options);
+ 
       }
 
       const onevent = socket.onevent;
@@ -85,17 +88,10 @@ export const socketIOMiddleware = (
           action
         ));
       });
-
-      if (nextAction) {
-        return next(action);
-      }
+      initializedSocket[connectAction] = true;
     }
 
     if (socket != null) {
-      if (!socket.connected) {
-        throw new Error('Socket must call a connect event before dispatching any actions.');
-      }
-  
       dispatchEvents.map((event) => {
         if (action.type === event.action) {
           return event.dispatch(socket, store, action);
