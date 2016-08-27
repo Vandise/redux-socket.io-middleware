@@ -86,7 +86,7 @@ export const socketIOMiddleware = (
         ));
       });
 
-      if (nextAction) {
+      if (nextAction || socket) {
         return next(action);
       }
     }
