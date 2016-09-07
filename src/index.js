@@ -85,7 +85,8 @@ export const socketIOMiddleware = (
         socket.on(evt.action.toString(), eventAction(
           store,
           next,
-          action
+          action,
+          socket
         ));
       });
       initializedSocket[connectAction] = true;
