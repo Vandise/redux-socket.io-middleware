@@ -99,7 +99,7 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
             socket.on('*', onEvent(socket, store, next, action));
             stateEvents.map(function (evt) {
               var eventAction = evt.dispatch;
-              socket.on(evt.action.toString(), eventAction(store, next, action));
+              socket.on(evt.action.toString(), eventAction(store, next, action, socket));
             });
             initializedSocket[connectAction] = true;
           })();
