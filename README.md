@@ -177,6 +177,12 @@ import * as EVENTS from './myMiddlewareName/';
 
 const initialSocket = null;
 
+// export events as well for the unit tests
+export const client = EVENTS.client;
+export const server = EVENTS.server;
+export const state = EVENTS.state;
+export const event = CONNECT;
+
 export default socketMiddleware(
   initialSocket,     /* unless a socket.io instance is already connected */
   EVENTS.client,
@@ -212,7 +218,51 @@ export default createStore(reducers, initialState,
 You're Done!
 
 ## Implementing Unit Tests
-Examples will be added soon.
+The following example is incomplete, but should give a good direction on how to test socket events without the need for a live server. This is more of a suggestion as how to test the events. The simple explanation on how to test the middleware events is to add an instantiated `mock socket` to the middleware initialization (See *Bundling the Middleware*).
+
+In order to mock the socket and capture the event data, you would construct a function to be reused like below.
+
+```javascript
+
+import sinon from 'sinon';
+
+global.mockClientSocket = () => {
+  return {
+    emit: sinon.spy(),
+  };
+};
+
+```
+
+We can then mock an event. Note that this can be simplified based on the test suite you are utilizing.
+
+```javascript
+
+import * as MyMiddleware from '../middleware/myMiddlewareName';
+import * as actions from '../actions';
+
+describe('My Middleware', () => {
+  describe('validateClientAttempt', () => {
+    it('Attempts to connect to the specified server', () => {
+
+      const socket = mockClientSocket();
+      const middleware = MyMiddleware.middleware(socket, MyMiddleware.client);
+      const store = mockStore({}, middleware);
+      const server = {}; // fake data
+
+      const expected = [events.VALIDATE_CLIENT_ATTEMPT, {
+        host: server.ip,
+        port: server.port,
+        version: server.version,
+      }];
+      store.dispatch(actions.validateClientAttempt(server));
+      expect(socket.emit.lastCall.args).to.eql(expected);
+    });
+  });
+});
+
+
+```
 
 ### Contributing
 
