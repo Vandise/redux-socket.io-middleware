@@ -1,0 +1,6 @@
+// Chai uses non-terminating expressions as part of standard assertions.
+{
+  "rules": {
+    "no-unused-expressions": [0]
+  }
+}
