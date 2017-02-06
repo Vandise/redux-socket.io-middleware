@@ -8,8 +8,14 @@ knowledge of the socket and the connection. Messages from the client should be s
 ## Installing the Middleware
 The Middleware can be installed by adding the following to your package.json:
 ```
-"redux-socket.io-middleware":
-"https://github.com/Vandise/redux-socket.io-middleware/archive/master.tar.gz",
+"socket.io-middleware":
+"https://github.com/Vandise/redux-socket.io-middleware/archive/{branch_name}.tar.gz",
+```
+
+or through NPM:
+
+```
+npm i socket.io-middleware
 ```
 
 ## Getting Started
@@ -165,7 +171,7 @@ After which, we need to configure the middleware to be aware of these events and
 
 ```javascript
 
-import socketMiddleware from 'redux-socket.io-middleware';
+import socketMiddleware from 'socket.io-middleware';
 import { CONNECT } from './constants/messages/connect';
 import * as EVENTS from './myMiddlewareName/';
 
