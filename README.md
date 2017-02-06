@@ -73,7 +73,27 @@ export default [
 ### Server Events
 Server events are messages being sent from the server to the client (web browser). This excludes events such as `connect`, `disconnect`, `reconnect`, etc. Following the directory structure mentioned, we place our client events in `middleware/myMiddlewareName/server/`
 
-Socket.IO's interface for handling all server events is non-existent and requires you to `specify a function` to find the event. The function chain to execute the event (if found) should look similar, if not exactly, like below:
+Like client events, we specify an action that will be sent from the `server` and a function to `dispatch`.
+
+>middleware/myMiddlewareName/server/validateClientAttempt.js
+
+```javascript
+
+export const dispatch = (action, data, dispatch) => {
+  dispatch({
+    type: 'SET_VALUE_FROM_SERVER',
+    payload: data,
+  });
+};
+
+export default {
+  action: 'SET_VALUE_FROM_SERVER',
+  dispatch,
+};
+
+```
+
+We then export all our server event objects in an `array`.
 
 >middleware/myMiddlewareName/server/index.js
 
@@ -81,35 +101,9 @@ Socket.IO's interface for handling all server events is non-existent and require
 
 import validateClientAttempt from './validateClientAttempt'
 
-const events = [
+export default [
   validateClientAttempt,
 ];
-
-export default (socket, store, next, action) => (event, data) => {
-  return events.some((e) => {
-    return e(event, data, store.dispatch);
-  });
-};
-
-```
-
-Essentially the `array` of `events` must be a function that returns a `bool` specifying that the event executed. Of course there are many ways to handle this.
-
->middleware/myMiddlewareName/server/validateClientAttempt.js
-
-```javascript
-
-import { VALIDATE_CLIENT_ATTEMPT } from '../constants/messages';
-
-export default (action, data, dispatch) => {
-  if (action === VALIDATE_CLIENT_ATTEMPT) {
-    // check if the client validated, dispatch an action if needed
-    dispatch(/* some action and data */);
-    return true;
-  }
-  return false;
-};
-
 
 ```
 
