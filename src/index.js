@@ -58,6 +58,17 @@ export const socketIOMiddleware = (
   const onEvent = listenEvents;
   initializedSocket[connectAction] = false;
 
+  const serverEvent = (socket, store, next, action) => (event, data) => {
+    listenEvents.some((e) => {
+      if (e.action === event) {
+        console.log("dispatching event", event);
+        e.dispatch(event, data, store.dispatch);
+        return true;
+      }
+      return false;
+    });
+  };
+
   return store => next => action => {
     if (action.type === connectAction && !initializedSocket[connectAction]) {
       let nextAction = false;
@@ -79,7 +90,8 @@ export const socketIOMiddleware = (
         onevent.call(socket, packet);
       };
       
-      socket.on('*', onEvent(socket, store, next, action));
+      socket.on('*', serverEvent(socket, store, next, action));
+
       stateEvents.map((evt) => {
         let eventAction = evt.dispatch;
         socket.on(evt.action.toString(), eventAction(

@@ -1,4 +1,4 @@
-import socketMiddleware from 'redux-socket.io-middleware';
+import socketMiddleware from '../../../../dist/';
 import stateEvents from './state/';
 import clientEvents from './client/';
 import serverEvents from './server/';

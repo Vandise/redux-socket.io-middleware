@@ -73,6 +73,19 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
   var onEvent = listenEvents;
   initializedSocket[connectAction] = false;
 
+  var serverEvent = function serverEvent(socket, store, next, action) {
+    return function (event, data) {
+      listenEvents.some(function (e) {
+        if (e.action === event) {
+          console.log("dispatching event", event);
+          e.dispatch(event, data, store.dispatch);
+          return true;
+        }
+        return false;
+      });
+    };
+  };
+
   return function (store) {
     return function (next) {
       return function (action) {
@@ -96,7 +109,8 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
               onevent.call(socket, packet);
             };
 
-            socket.on('*', onEvent(socket, store, next, action));
+            socket.on('*', serverEvent(socket, store, next, action));
+
             stateEvents.map(function (evt) {
               var eventAction = evt.dispatch;
               socket.on(evt.action.toString(), eventAction(store, next, action, socket));
