@@ -1,4 +1,4 @@
-# redux-socket.io-middleware [![Build Status](https://travis-ci.org/Vandise/redux-socket.io-middleware.svg?branch=master)](https://travis-ci.org/Vandise/redux-socket.io-middleware)
+# redux-socket.io-middleware [![Build Status](https://travis-ci.org/Vandise/redux-socket.io-middleware.svg?branch=v0.1.1)](https://travis-ci.org/Vandise/redux-socket.io-middleware)
 An implementation of a generic socket.io middleware. Implemented with the notion that the application will be utilizing mutliple sockets.
 
 ## Introduction
