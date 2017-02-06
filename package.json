@@ -9,7 +9,6 @@
   },
   "scripts": {
     "build": "rm -rf dist && babel src --out-dir dist",
-    "example": "rm -rf dist && babel example --out-dir dist",
     "test": "mocha --opts spec/mocha.opts ${FILE:-spec}"
   },
   "keywords": [
@@ -19,6 +18,9 @@
   ],
   "author": "andeb2804@gmail.com",
   "license": "GNU",
+  "dependencies": {
+    "socket.io-client": "^1.4.8"
+  },
   "devDependencies": {
     "babel-eslint": "^6.0.2",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
@@ -38,6 +40,5 @@
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "socket.io": "^1.4.8",
-    "socket.io-client": "^1.4.8"
   }
 }
