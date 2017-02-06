@@ -77,7 +77,6 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
     return function (event, data) {
       listenEvents.some(function (e) {
         if (e.action === event) {
-          console.log("dispatching event", event);
           e.dispatch(event, data, store.dispatch);
           return true;
         }

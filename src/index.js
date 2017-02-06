@@ -61,7 +61,6 @@ export const socketIOMiddleware = (
   const serverEvent = (socket, store, next, action) => (event, data) => {
     listenEvents.some((e) => {
       if (e.action === event) {
-        console.log("dispatching event", event);
         e.dispatch(event, data, store.dispatch);
         return true;
       }
