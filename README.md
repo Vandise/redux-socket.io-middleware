@@ -218,53 +218,90 @@ export default createStore(reducers, initialState,
 You're Done!
 
 ## Implementing Unit Tests
-The following example is incomplete, but should give a good direction on how to test socket events without the need for a live server. This is more of a suggestion as how to test the events. The simple explanation on how to test the middleware events is to add an instantiated `mock socket` to the middleware initialization (See *Bundling the Middleware*).
-
-In order to mock the socket and capture the event data, you would construct a function to be reused like below.
+A helper class is provided to simplify unit testing. To include the test class, simply import it from the `socket.io-middleware` package:
 
 ```javascript
-
-import sinon from 'sinon';
-
-global.mockClientSocket = () => {
-  return {
-    emit: sinon.spy(),
-  };
-};
-
+import { testClient } from 'socket.io-middleware';
 ```
 
-We can then mock an event. Note that this can be simplified based on the test suite you are utilizing.
+### Initializing the test client
+To initialize the test client with your middleware, you must have access to your defined `client events`, `state events`, `server events`, and `connect action`. You must also provide the `raw construct function of your middleware` so a mock socket can be initialized. Look at the examples for implementation.
+
+You can then `bind your middleware` and initialize a mock store with your `reducers` to create an environment to test your middleware.
 
 ```javascript
+const setUp = () => {
+  const client = new testClient(
+    clientActions,
+    serverActions,
+    stateActions
+  );
+  client.bindMiddleware(middleware)
+        .initializeMockStore(initialState, counterReducer);
+  return client;
+};
+```
 
-import * as MyMiddleware from '../middleware/myMiddlewareName';
-import * as actions from '../actions';
+### Mocking socket events
+The test client provides various functions that allow you to execute events in a secluded middleware environment. These include: `mockClientEvent`, `mockServerEvent`, and `mockStateEvent`.
 
-describe('My Middleware', () => {
-  describe('validateClientAttempt', () => {
-    it('Attempts to connect to the specified server', () => {
 
-      const socket = mockClientSocket();
-      const middleware = MyMiddleware.middleware(socket, MyMiddleware.client);
-      const store = mockStore({}, middleware);
-      const server = {}; // fake data
+>mockClientEvent(event), event = { action, dispatch }
+>mockServerEvent(event, data, dispatch = sinon.spy()), event = string, dispatch = spy||store.dispatch
+>mockStateEvent(event, data, next = NOOP, action = {}, dispatch = sinon.spy()), event = string, data = {}
 
-      const expected = [events.VALIDATE_CLIENT_ATTEMPT, {
-        host: server.ip,
-        port: server.port,
-        version: server.version,
-      }];
-      store.dispatch(actions.validateClientAttempt(server));
-      expect(socket.emit.lastCall.args).to.eql(expected);
-    });
+>Client Events
+
+```javascript
+describe("INCREMENT", () => {
+  it("Emits an INCREMENT event to the server", () => {
+    const client = setUp();
+    client.mockClientEvent(actions.INCREMENT());
+    expect(client.socket.emit.calledOnce);
+    expect(client.socket.emit.firstCall.args).to.eql(['INCREMENT', undefined]);
   });
 });
-
-
 ```
 
-### Contributing
+>Server Events
+
+```javascript
+describe("SET_VALUE_FROM_SERVER", () => {
+
+  it("Dispatches a SET_VALUE_FROM_SERVER event", () => {
+    const client = setUp();
+    const event = client.mockServerEvent('SET_VALUE_FROM_SERVER', { value: 1 } );
+    expect(event.firstCall.args).to.eql([ { type: 'SET_VALUE_FROM_SERVER', payload: { value: 1 } } ]);
+  });
+
+  it("Updates the state to a specified value", () => {
+    const client = setUp();
+    const event = client.mockServerEvent('SET_VALUE_FROM_SERVER', { value: 1 }, client.store.dispatch);
+    expect(client.store.getState().value).to.equal(1);
+  });
+});
+```
+
+>State Events
+
+```javascript
+describe("State Events", () => {
+  describe("connect", () => {
+
+    it("Dispatched the CONNECTED action", () => {
+      const client = setUp();
+      const event = client.mockStateEvent('connect'); 
+      expect(event.firstCall.args).to.eql([ { type: 'CONNECTED' } ]);   
+    });
+
+  });
+});
+```
+
+### Resetting your middleware store
+Call `resetStore` on the test client to reset the store state and dispatch functions. Best to utilize after every test.
+
+## Contributing
 
 Send a pull request noting the change, why it's required, and assign to Vandise. Current on-going issues include:
 - Standardizing the socket message interfaces so functions are concise between message types.
@@ -274,3 +311,6 @@ Send a pull request noting the change, why it's required, and assign to Vandise.
 
 ## License
 GPL v3.0
+
+Any updates or enhancements to this package must be open-source.
+Any commercial products utilizing this package must be open-source or provide source code when requested.
