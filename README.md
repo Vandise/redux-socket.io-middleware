@@ -247,7 +247,9 @@ The test client provides various functions that allow you to execute events in a
 
 
 >mockClientEvent(event), event = { action, dispatch }
+
 >mockServerEvent(event, data, dispatch = sinon.spy()), event = string, dispatch = spy||store.dispatch
+
 >mockStateEvent(event, data, next = NOOP, action = {}, dispatch = sinon.spy()), event = string, data = {}
 
 >Client Events
