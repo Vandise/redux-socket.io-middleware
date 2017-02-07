@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _sinon = require("sinon");
+var _sinon = require('sinon');
 
 var _sinon2 = _interopRequireDefault(_sinon);
 
@@ -19,13 +19,22 @@ var _class = function () {
     _classCallCheck(this, _class);
 
     this.emit = _sinon2.default.spy();
+    this.lastDispatch = null;
     this.serverEvents = serverEvents;
   }
 
   _createClass(_class, [{
-    key: "on",
-    value: function on(event, data, dispatch) {
-      console.log("socket.on", event, data, dispatch);
+    key: 'on',
+    value: function on(e, data, dispatch) {
+      this.serverEvents.some(function (event) {
+        if (event.action === e) {
+          event.dispatch(e, data, dispatch);
+          return true;
+        }
+        return false;
+      });
+      this.lastDispatch = dispatch;
+      return dispatch;
     }
   }]);
 
