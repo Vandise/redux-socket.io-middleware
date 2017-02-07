@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DEFAULT_CONNECT_EVENT = undefined;
+exports.NOOP = exports.DEFAULT_CONNECT_EVENT = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -26,6 +26,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DEFAULT_CONNECT_EVENT = exports.DEFAULT_CONNECT_EVENT = 'CONNECT';
+var NOOP = exports.NOOP = function NOOP() {
+  return null;
+};
 
 var _class = function () {
   function _class() {
@@ -36,7 +39,7 @@ var _class = function () {
 
     _classCallCheck(this, _class);
 
-    this.socket = new _mockSocket2.default(serverEvents);
+    this.socket = new _mockSocket2.default(serverEvents, stateEvents);
     this.middleware = null;
     this.store = null;
     this.initializedMiddleware = false;
@@ -44,6 +47,9 @@ var _class = function () {
     this.serverEvents = serverEvents;
     this.stateEvents = stateEvents;
     this.connectEvent = connectEvent;
+    this.cachedDispatch = null;
+    this.initialState = {};
+    this.reducers = null;
   }
 
   _createClass(_class, [{
@@ -53,9 +59,17 @@ var _class = function () {
       return this;
     }
   }, {
+    key: 'resetStore',
+    value: function resetStore() {
+      this.initializeMockStore(this.initialState, this.reducers);
+    }
+  }, {
     key: 'initializeMockStore',
     value: function initializeMockStore(initialState, combinedReducers) {
       this.store = (0, _redux.createStore)(combinedReducers, initialState, (0, _redux.applyMiddleware)(_reduxThunk2.default, this.middleware));
+      this.initialState = initialState;
+      this.cachedDispatch = this.store.dispatch;
+      this.reducers = combinedReducers;
       return this;
     }
   }, {
@@ -69,6 +83,16 @@ var _class = function () {
       var dispatch = arguments.length <= 2 || arguments[2] === undefined ? _sinon2.default.spy() : arguments[2];
 
       return this.socket.on(event, data, dispatch);
+    }
+  }, {
+    key: 'mockStateEvent',
+    value: function mockStateEvent(event, data) {
+      var next = arguments.length <= 2 || arguments[2] === undefined ? NOOP : arguments[2];
+      var action = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
+      var dispatch = arguments.length <= 4 || arguments[4] === undefined ? _sinon2.default.spy() : arguments[4];
+
+      this.store.dispatch = dispatch;
+      return this.socket.stateEvent(event, data, next, action, this.store);
     }
   }]);
 

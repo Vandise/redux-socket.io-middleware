@@ -56,4 +56,16 @@ describe("Counter Middleware", () => {
     });
   });
 
+  describe("State Events", () => {
+    describe("connect", () => {
+
+      it("Dispatched the CONNECTED action", () => {
+        const client = setUp();
+        const event = client.mockStateEvent('connect'); 
+        expect(event.firstCall.args).to.eql([ { type: 'CONNECTED' } ]);   
+      });
+
+    });
+  });
+
 });

@@ -15,12 +15,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _class = function () {
-  function _class(serverEvents) {
+  function _class(serverEvents, stateEvents) {
     _classCallCheck(this, _class);
 
     this.emit = _sinon2.default.spy();
     this.lastDispatch = null;
     this.serverEvents = serverEvents;
+    this.stateEvents = stateEvents;
   }
 
   _createClass(_class, [{
@@ -35,6 +36,22 @@ var _class = function () {
       });
       this.lastDispatch = dispatch;
       return dispatch;
+    }
+  }, {
+    key: 'stateEvent',
+    value: function stateEvent(e, data, next, action, store) {
+      var _this = this;
+
+      this.stateEvents.some(function (event) {
+        if (event.action === e) {
+          var stateAction = event.dispatch(store, next, action, _this);
+          stateAction();
+          return true;
+        }
+        return false;
+      });
+      this.lastDispatch = store.dispatch;
+      return store.dispatch;
     }
   }]);
 

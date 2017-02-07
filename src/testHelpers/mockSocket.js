@@ -2,10 +2,11 @@ import sinon from 'sinon';
 
 export default class {
 
-  constructor(serverEvents) {
+  constructor(serverEvents, stateEvents) {
     this.emit = sinon.spy();
     this.lastDispatch = null;
     this.serverEvents = serverEvents;
+    this.stateEvents = stateEvents;
   }
 
   on(e, data, dispatch) {
@@ -18,6 +19,19 @@ export default class {
     });
     this.lastDispatch = dispatch;
     return dispatch;
+  }
+
+  stateEvent(e, data, next, action, store) {
+    this.stateEvents.some((event) => {
+      if (event.action === e) {
+        const stateAction = event.dispatch(store, next, action, this);
+        stateAction();
+        return true;
+      }
+      return false;
+    });
+    this.lastDispatch = store.dispatch;
+    return store.dispatch;
   }
 
 };
