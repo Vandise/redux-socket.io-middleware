@@ -1,47 +1,15 @@
 import io from 'socket.io-client';
+import { initialStateEvents } from "./state/defaultEvents";
+import { defaultSocketEvents } from "./client/defaultEvents";
+import { onSocketEvents } from "./client/defaultEvents";
+export { testClient } from "./testHelpers/client";
+export { mockSocket } from "./testHelpers/mockSocket";
+
+//if (process.env.NODE_ENV != 'production') {
+//}
 
 export const defaultOpts = {
   transports: ['websocket'],
-};
-
-export const initialStateEvents = [
-  {
-    action: 'connecting',
-    dispatch: (store, next, action) => (socket) => {
-      console.log('Socket is connecting.');
-    }
-  },
-  {
-    action: 'connect',
-    dispatch: (store, next, action) => (socket) => {
-      console.log('Socket connected.');
-    }
-  },
-  {
-    action: 'disconnect',
-    dispatch: (store, next, action) => (socket) => {
-      console.log('Socket disconnected.');
-    }
-  },
-  {
-    action: 'reconnecting',
-    dispatch: (store, next, action) => (socket) => {
-      console.log('Socket reconnecting.');
-    }
-  }
-];
-
-export const defaultSocketEvents = [
-  {
-    action: 'NOOP',
-    dispatch: (socket, store, action) => {
-      console.debug('NOOP event called. Have you implemented your events?');
-    }, 
-  },
-];
-
-export const onSocketEvents = (socket, store, next, action) => (event, data) => {
-  console.error('Socket not listening for any events.');
 };
 
 let initializedSocket = [];
