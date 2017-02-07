@@ -8,7 +8,7 @@ export default class {
   }
 
   on(event, data, dispatch) {
-    console.log(event, data, dispatch);
+    console.log("socket.on", event, data, dispatch);
   }
 
 };

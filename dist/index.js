@@ -10,7 +10,7 @@ var _client = require("./testHelpers/client");
 Object.defineProperty(exports, "testClient", {
   enumerable: true,
   get: function get() {
-    return _client.testClient;
+    return _interopRequireDefault(_client).default;
   }
 });
 
@@ -19,7 +19,7 @@ var _mockSocket = require("./testHelpers/mockSocket");
 Object.defineProperty(exports, "mockSocket", {
   enumerable: true,
   get: function get() {
-    return _mockSocket.mockSocket;
+    return _interopRequireDefault(_mockSocket).default;
   }
 });
 
@@ -32,9 +32,6 @@ var _defaultEvents = require("./state/defaultEvents");
 var _defaultEvents2 = require("./client/defaultEvents");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//if (process.env.NODE_ENV != 'production') {
-//}
 
 var defaultOpts = exports.defaultOpts = {
   transports: ['websocket']

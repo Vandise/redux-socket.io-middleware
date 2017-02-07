@@ -2,11 +2,8 @@ import io from 'socket.io-client';
 import { initialStateEvents } from "./state/defaultEvents";
 import { defaultSocketEvents } from "./client/defaultEvents";
 import { onSocketEvents } from "./client/defaultEvents";
-export { testClient } from "./testHelpers/client";
-export { mockSocket } from "./testHelpers/mockSocket";
-
-//if (process.env.NODE_ENV != 'production') {
-//}
+export { default as testClient } from "./testHelpers/client";
+export { default as mockSocket } from "./testHelpers/mockSocket";
 
 export const defaultOpts = {
   transports: ['websocket'],

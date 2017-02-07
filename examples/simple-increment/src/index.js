@@ -17,7 +17,7 @@ const el = document.getElementById('app');
 /*
   Application Actions
 */
-const actions = {
+export const actions = {
   INCREMENT: createAction('INCREMENT'),
   DECREMENT: createAction('DECREMENT'),
   CONNECT: createAction('CONNECT', (host, port) => {
@@ -30,7 +30,7 @@ const actions = {
 /*
   Reducer for events received by the server
 */
-const counterReducer = handleActions({
+export const counterReducer = handleActions({
   SET_VALUE_FROM_SERVER: (state, action) => {
     return {
       ...state,
@@ -51,7 +51,7 @@ const counterReducer = handleActions({
 /*
   Initialize store
 */
-const initialState = {
+export const initialState = {
   value: 0,
   connected: false,
 };
