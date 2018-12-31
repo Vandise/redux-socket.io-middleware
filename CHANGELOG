@@ -1,0 +1,13 @@
+v1.0.0
+=======
+* Removed Mock Client in favor of a simplified API
+* Standardized State events to follow the same parameter structure
+  as Client events ( socket, store, next, action )
+* Added Namespaces
+* Added TestDouble dev dependency
+* Fixed a bug regarding state tracking for multiple sockets
+* Exposed sockets and their connection states through module globals
+* Added helper functions for managing the sockets directly
+* Cleaned up code
+* Serverless unit tests
+* Improved code coverage
