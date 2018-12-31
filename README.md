@@ -1,9 +1,11 @@
 # redux-socket.io-middleware [![Build Status](https://travis-ci.org/Vandise/redux-socket.io-middleware.svg?branch=master)](https://travis-ci.org/Vandise/redux-socket.io-middleware)
-An implementation of a generic socket.io middleware. Implemented with the notion that the application will be utilizing mutliple sockets.
+An implementation of a generic socket.io middleware. Implemented with the notion that the application will be utilizing multiple sockets.
 
 ## Introduction
-This is an opinionated implementation of how redux should work with sockets. The philosophy is simple: only the middleware should have
+This is an opinionated implementation of how redux should work with sockets. The philosophy is that only the middleware should have
 knowledge of the socket and the connection. Messages from the client should be sent by dispatching actions to the store and messages from the server should be dispatched as actions once received. 
+
+Though this package works well with a single socket connection, it is intended to maintain multiple connections in a single application. For single connections, it may be more appropriate to have a "networking" layer dispatching and handling redux events.
 
 ## Installing the Middleware
 The Middleware can be installed by adding the following to your package.json:
@@ -123,7 +125,7 @@ State events are events triggered by socket.io, not by user actions. These inclu
 import { initialAction } from '../actions/handleConnect';
 
 const action = 'connect';
-const dispatch = (store, next, action, socket) => () => {
+const dispatch = (socket, store, next, action) => () => {
   store.dispatch(handleConnect());
 };
 
@@ -189,7 +191,7 @@ export default socketMiddleware(
   EVENTS.server,
   EVENTS.state,
   CONNECT,           /* connect action to be sent by redux to initialize the socket */
-                     /* this also serves as a unique idendifier for multiple socket applications */
+  /* options */      /* this also serves as a unique idendifier for multiple socket applications */
 );
 
 ```
@@ -217,91 +219,15 @@ export default createStore(reducers, initialState,
 
 You're Done!
 
-## Implementing Unit Tests
-A helper class is provided to simplify unit testing. To include the test class, simply import it from the `socket.io-middleware` package:
+### Managing Multiple Socket Connections
+This package is intended to maintain multiple socket connections. Follow the above exactly until you have to define a `CONNECT` event. This event is your unique identifier for your socket. Rather than name the event `connect`, give it a meaningful value, such as `CHAT_SERVER_CONNECT`.
 
-```javascript
-import { testClient } from 'socket.io-middleware';
-```
+Be sure to give your Redux actions unique types. Multiple sockets listening to the same event will execute the action.
 
-### Initializing the test client
-To initialize the test client with your middleware, you must have access to your defined `client events`, `state events`, `server events`, and `connect action`. You must also provide the `raw construct function of your middleware` so a mock socket can be initialized. Look at the examples for implementation.
+## Configurations
+The sockets follow all the same configurations as specified in the socket.io documentation (devdocs.io/socketio). You can pass these configurations in the options parameter when initializing the middleware ( see: Bundling the Middleware ).
 
-You can then `bind your middleware` and initialize a mock store with your `reducers` to create an environment to test your middleware.
-
-```javascript
-const setUp = () => {
-  const client = new testClient(
-    clientActions,
-    serverActions,
-    stateActions
-  );
-  client.bindMiddleware(middleware)
-        .initializeMockStore(initialState, counterReducer);
-  return client;
-};
-```
-
-### Mocking socket events
-The test client provides various functions that allow you to execute events in a secluded middleware environment. These include: `mockClientEvent`, `mockServerEvent`, and `mockStateEvent`.
-
-
->mockClientEvent(event), event = { action, dispatch }
-
->mockServerEvent(event, data, dispatch = sinon.spy()), event = string, dispatch = spy||store.dispatch
-
->mockStateEvent(event, data, next = NOOP, action = {}, dispatch = sinon.spy()), event = string, data = {}
-
->Client Events
-
-```javascript
-describe("INCREMENT", () => {
-  it("Emits an INCREMENT event to the server", () => {
-    const client = setUp();
-    client.mockClientEvent(actions.INCREMENT());
-    expect(client.socket.emit.calledOnce);
-    expect(client.socket.emit.firstCall.args).to.eql(['INCREMENT', undefined]);
-  });
-});
-```
-
->Server Events
-
-```javascript
-describe("SET_VALUE_FROM_SERVER", () => {
-
-  it("Dispatches a SET_VALUE_FROM_SERVER event", () => {
-    const client = setUp();
-    const event = client.mockServerEvent('SET_VALUE_FROM_SERVER', { value: 1 } );
-    expect(event.firstCall.args).to.eql([ { type: 'SET_VALUE_FROM_SERVER', payload: { value: 1 } } ]);
-  });
-
-  it("Updates the state to a specified value", () => {
-    const client = setUp();
-    const event = client.mockServerEvent('SET_VALUE_FROM_SERVER', { value: 1 }, client.store.dispatch);
-    expect(client.store.getState().value).to.equal(1);
-  });
-});
-```
-
->State Events
-
-```javascript
-describe("State Events", () => {
-  describe("connect", () => {
-
-    it("Dispatched the CONNECTED action", () => {
-      const client = setUp();
-      const event = client.mockStateEvent('connect'); 
-      expect(event.firstCall.args).to.eql([ { type: 'CONNECTED' } ]);   
-    });
-
-  });
-});
-```
-
-### Resetting your middleware store
-Call `resetStore` on the test client to reset the store state and dispatch functions. Best to utilize after every test.
+You can learn more from the provided example.
 
 ## Contributing
 
@@ -315,4 +241,3 @@ Send a pull request noting the change, why it's required, and assign to Vandise.
 GPL v3.0
 
 Any updates or enhancements to this package must be open-source.
-Any commercial products utilizing this package must be open-source or provide source code when requested.
