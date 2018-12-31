@@ -70,6 +70,7 @@ export const socketio = (
       socket = exports.getSocket(connectAction);
 
       exports.onEventOverride(connectAction);
+      socket.on('*', serverEventHandler(serverEvents, store.dispatch));
     }
 
     return next(action);

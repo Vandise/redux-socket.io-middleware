@@ -13,7 +13,8 @@ describe('Redux SocketIO Middleware', () => {
   beforeEach(() => {
     mockSocket = {
       id: 'test-socket',
-      onevent: sinon.spy()
+      onevent: sinon.spy(),
+      on: sinon.spy(),
     };
 
     mockClient = {
@@ -182,6 +183,11 @@ describe('Redux SocketIO Middleware', () => {
           const original = mockSocket.onevent;
           middleware.socketio()(store)(next)(action);
           expect(mockSocket.onevent).to.not.equal(original);
+        });
+
+        it('registers the wildcard event handler', () => {
+          middleware.socketio()(store)(next)(action);
+          expect(mockSocket.on).to.have.been.calledWith('*')
         });
       });
     });
