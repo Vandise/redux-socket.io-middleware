@@ -23,7 +23,7 @@ export function isConnectAction(action, connectAction, connected) {
 
 export function getSocket(id) {
   return exports.SOCKETS[id] || null;
-}
+};
 
 export function generateConnectString(payload) {
   let connStr = `${payload.host}:${payload.port}`;
@@ -31,7 +31,7 @@ export function generateConnectString(payload) {
     connStr += `/${payload.namespace}`;
   }
   return connStr;
-}
+};
 
 export function onEventOverride(id) {
   const socket = exports.getSocket(id);
@@ -42,6 +42,23 @@ export function onEventOverride(id) {
     packet.data = ['*'].concat(args);
     onevent.call(socket, packet);
   };
+};
+
+export function registerStateEvents(id, events, redux) {
+  const socket = exports.getSocket(id);
+  events.map((evt) => {
+    let eventAction = evt.dispatch;
+    socket.on(evt.action.toString(), eventAction(
+      socket,
+      redux.store,
+      redux.next,
+      redux.action
+    ));
+  });
+};
+
+export function toggleInitStatus(id) {
+  exports.SOCKET_INITIALIZED[id] = !exports.SOCKET_INITIALIZED[id];
 }
 
 export const socketio = (
@@ -71,6 +88,9 @@ export const socketio = (
 
       exports.onEventOverride(connectAction);
       socket.on('*', serverEventHandler(serverEvents, store.dispatch));
+      exports.registerStateEvents(connectAction, stateEvents, { store, next, action });
+
+      exports.toggleInitStatus(connectAction);
     }
 
     return next(action);

@@ -189,6 +189,18 @@ describe('Redux SocketIO Middleware', () => {
           middleware.socketio()(store)(next)(action);
           expect(mockSocket.on).to.have.been.calledWith('*')
         });
+
+        ['connecting', 'connect', 'disconnect', 'reconnecting'].forEach((evt) => {
+          it(`registers the ${evt} event`, () => {
+            middleware.socketio()(store)(next)(action);
+            expect(mockSocket.on).to.have.been.calledWith(evt)
+          });
+        });
+
+        it('sets the init status to true', () => {
+          middleware.socketio()(store)(next)(action);
+          expect(middleware.isInitialized(DEFAULT_ID)).to.equal(true);
+        });
       });
     });
   });
