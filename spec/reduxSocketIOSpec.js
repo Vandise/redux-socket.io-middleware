@@ -3,11 +3,30 @@ import * as socketIOMiddleware from '../src/index';
 describe('Redux SocketIO Middleware', () => {
 
   let middleware;
+  let next;
+  let store;
+  let action;
+  let DEFAULT_ID;
+  let mockClient;
 
   beforeEach(() => {
-    middleware = socketIOMiddleware;
+
+    mockClient = {
+      connect: sinon.stub().returns({ id: 'test-socket' }),
+    };
+
+    td.replace('../src/middleware/ioclient', () => mockClient);
+
+    middleware = require('../src/index');
+    DEFAULT_ID = middleware.DEFAULT_CONNECT_EVENT;
     td.replace(middleware, 'SOCKET_INITIALIZED', {});
     td.replace(middleware, 'SOCKETS', {});
+  
+    store = {};
+    next = () => true;
+    action = {
+      type: DEFAULT_ID,
+    };
   });
 
   afterEach(() => {
@@ -93,6 +112,65 @@ describe('Redux SocketIO Middleware', () => {
 
       it('appends the slug', () => {
         expect(middleware.generateConnectString(PAYLOAD)).to.equal('test:8080/debug');
+      });
+    });
+  });
+
+  /*
+    isInitialized
+  */ 
+  describe('.isInitialized', () => {
+    describe('when present', () => {
+      beforeEach(() => {
+        const OBJ = {};
+        OBJ[DEFAULT_ID] = true;
+        td.replace(middleware, 'SOCKET_INITIALIZED', OBJ);
+      });
+
+      it('returns the status', () => {
+        expect(middleware.isInitialized(DEFAULT_ID)).to.equal(true);
+      });
+    });
+
+    describe('when absent', () => {
+      it('returns false', () => {
+        expect(middleware.isInitialized(DEFAULT_ID)).to.equal(false);
+      });
+    });
+  });
+
+  /*
+    socketio
+  */
+  describe('.socketio', () => {
+    describe('on initialization', () => {
+      it('sets the socket as uninitialized', () => {
+        middleware.socketio();
+        expect(middleware.SOCKET_INITIALIZED).to.have.keys(DEFAULT_ID);
+        expect(middleware.isInitialized(DEFAULT_ID)).to.equal(false);
+      });
+
+      it('adds the socket to the sockets map', () => {
+        const MOCK_SOCKET = { id: 'SOCKET_3_TEST' };
+        middleware.socketio(MOCK_SOCKET);
+        expect(middleware.SOCKETS).to.have.keys(DEFAULT_ID);
+      });
+    });
+
+    describe('when the connect action is passed', () => {
+      beforeEach(() => {
+        action = Object.assign({}, action, { payload: { host: 'test', port: 1234 } });
+        middleware.socketio()(store)(next)(action);
+      });
+
+      describe('and the socket has not been initialized', () => {
+        it('adds the socket to the sockets map', () => {
+          expect(middleware.SOCKETS[DEFAULT_ID]).to.deep.equal({ id: 'test-socket' });
+        });
+
+        it('initializes a new socket', () => {
+          expect(mockClient.connect).to.have.been.calledWith('test:1234', middleware.DEFAULT_SOCKETIO_OPTIONS);
+        });
       });
     });
   });
