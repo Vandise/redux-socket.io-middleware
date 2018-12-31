@@ -203,5 +203,26 @@ describe('Redux SocketIO Middleware', () => {
         });
       });
     });
+
+    describe('when the socket is connected', () => {
+      describe('and a client request is sent', () => {
+        beforeEach(() => {
+          action = Object.assign({}, action, { payload: { host: 'test', port: 1234 } });
+        });
+
+        it('dispatches the action', () => {
+          const event = {
+            action: 'TEST',
+            dispatch: sinon.spy()
+          };
+          const testMiddleware = middleware.socketio(null, [event]);
+
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: 'TEST' });
+
+          expect(event.dispatch).to.have.been.called;
+        });
+      });
+    });
   });
 });

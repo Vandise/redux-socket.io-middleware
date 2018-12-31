@@ -93,6 +93,16 @@ export const socketio = (
       exports.toggleInitStatus(connectAction);
     }
 
+    if (socket != null) {
+      clientEvents.some((event) => {
+        if (action.type === event.action) {
+          event.dispatch(socket, store, action);
+          return true;
+        }
+        return false;
+      });
+    }
+
     return next(action);
   };
 };
