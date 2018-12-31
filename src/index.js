@@ -33,6 +33,17 @@ export function generateConnectString(payload) {
   return connStr;
 }
 
+export function onEventOverride(id) {
+  const socket = exports.getSocket(id);
+  const onevent = socket.onevent;
+
+  socket.onevent = (packet) => {
+    const args = packet.data || [];
+    packet.data = ['*'].concat(args);
+    onevent.call(socket, packet);
+  };
+}
+
 export const socketio = (
   initializedSocket = null,
   clientEvents = defaultSocketEvents,
@@ -46,6 +57,7 @@ export const socketio = (
   exports.SOCKETS[connectAction] = initializedSocket;
 
   const IO = getIOClient();
+  let socket = null;
 
   return store => next => action => {
 
@@ -53,7 +65,11 @@ export const socketio = (
 
     if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {
       const CONN_STRING = exports.generateConnectString(action.payload);
+
       exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
+      socket = exports.getSocket(connectAction);
+
+      exports.onEventOverride(connectAction);
     }
 
     return next(action);

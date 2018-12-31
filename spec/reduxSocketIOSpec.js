@@ -8,11 +8,16 @@ describe('Redux SocketIO Middleware', () => {
   let action;
   let DEFAULT_ID;
   let mockClient;
+  let mockSocket;
 
   beforeEach(() => {
+    mockSocket = {
+      id: 'test-socket',
+      onevent: sinon.spy()
+    };
 
     mockClient = {
-      connect: sinon.stub().returns({ id: 'test-socket' }),
+      connect: sinon.stub().returns(mockSocket),
     };
 
     td.replace('../src/middleware/ioclient', () => mockClient);
@@ -160,16 +165,23 @@ describe('Redux SocketIO Middleware', () => {
     describe('when the connect action is passed', () => {
       beforeEach(() => {
         action = Object.assign({}, action, { payload: { host: 'test', port: 1234 } });
-        middleware.socketio()(store)(next)(action);
       });
 
       describe('and the socket has not been initialized', () => {
         it('adds the socket to the sockets map', () => {
-          expect(middleware.SOCKETS[DEFAULT_ID]).to.deep.equal({ id: 'test-socket' });
+          middleware.socketio()(store)(next)(action);
+          expect(middleware.SOCKETS[DEFAULT_ID]).to.deep.equal(mockSocket);
         });
 
         it('initializes a new socket', () => {
+          middleware.socketio()(store)(next)(action);
           expect(mockClient.connect).to.have.been.calledWith('test:1234', middleware.DEFAULT_SOCKETIO_OPTIONS);
+        });
+
+        it('overrides socketio\'s "onevent"', () => {
+          const original = mockSocket.onevent;
+          middleware.socketio()(store)(next)(action);
+          expect(mockSocket.onevent).to.not.equal(original);
         });
       });
     });
