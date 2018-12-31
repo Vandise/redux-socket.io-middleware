@@ -2,81 +2,53 @@ import io from 'socket.io-client';
 import { initialStateEvents } from "./state/defaultEvents";
 import { defaultSocketEvents } from "./client/defaultEvents";
 import { onSocketEvents } from "./client/defaultEvents";
-export { default as testClient } from "./testHelpers/client";
-export { default as mockSocket } from "./testHelpers/mockSocket";
+import serverEventHandler from "./middleware/server";
 
-export const defaultOpts = {
+export const DEFAULT_SOCKETIO_OPTIONS = {
   transports: ['websocket'],
 };
 
-let initializedSocket = [];
+export const SOCKET_INITIALIZED = {};
+export const SOCKETS = {};
+
+export function isConnectAction(action, connectAction, connected) {
+  return action.type === connectAction && !connected;
+};
+
+export function getSocket(id) {
+  return exports.SOCKETS[id] || null;
+}
+
+export function generateConnectString(payload) {
+  let connStr = `${payload.host}:${payload.port}`;
+  if (payload.namespace) {
+    connStr += `/${payload.namespace}`;
+  }
+  return connStr;
+}
 
 export const socketIOMiddleware = (
-  initialSocket = null,
-  dispatchEvents = defaultSocketEvents,
-  listenEvents = onSocketEvents,
+  initializedSocket = null,
+  clientEvents = defaultSocketEvents,
+  serverEvents = onSocketEvents,
   stateEvents = initialStateEvents,
   connectAction = 'CONNECT',
-  options = defaultOpts) => {
+  options = DEFAULT_SOCKETIO_OPTIONS
+) => {
 
-  let socket = initialSocket;
-  const onEvent = listenEvents;
-  initializedSocket[connectAction] = false;
-
-  const serverEvent = (socket, store, next, action) => (event, data) => {
-    listenEvents.some((e) => {
-      if (e.action === event) {
-        e.dispatch(event, data, store.dispatch);
-        return true;
-      }
-      return false;
-    });
-  };
+  exports.SOCKET_INITIALIZED[connectAction] = false;
+  exports.SOCKETS[connectAction] = initializedSocket;
 
   return store => next => action => {
-    if (action.type === connectAction && !initializedSocket[connectAction]) {
-      let nextAction = false;
-      if (socket === null) {
-        nextAction = true;
-        const connStr = `${action.payload.host}:${action.payload.port}`;
-        if (socket !== null) {
-          socket.close();
-        }
-        
-        socket = io.connect(connStr, options);
- 
-      }
 
-      const onevent = socket.onevent;
-      socket.onevent = (packet) => {
-        const args = packet.data || [];
-        packet.data = ['*'].concat(args);
-        onevent.call(socket, packet);
-      };
-      
-      socket.on('*', serverEvent(socket, store, next, action));
+    const IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, initializedSocket[connectAction]);
 
-      stateEvents.map((evt) => {
-        let eventAction = evt.dispatch;
-        socket.on(evt.action.toString(), eventAction(
-          store,
-          next,
-          action,
-          socket
-        ));
-      });
-      initializedSocket[connectAction] = true;
+    if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {
+      const CONN_STRING = exports.generateConnectString(action.payload);
+      exports.SOCKETS[connectAction] = io.connect(CONN_STRING, options);
     }
 
-    if (socket != null) {
-      dispatchEvents.map((event) => {
-        if (action.type === event.action) {
-          return event.dispatch(socket, store, action);
-        }
-      });
-    }
-
-    return next(action);
+    
   };
 };
 
