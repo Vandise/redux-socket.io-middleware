@@ -1,23 +1,12 @@
 {
-  "name": "react-template",
+  "name": "simple-increment",
   "version": "0.0.1",
-  "description": "React-Redux Application Template",
-  "main": "src/index.js",
+  "description": "Simple Increment demo",
+  "main": "client/index.js",
   "scripts": {
     "build": "webpack --config webpack.production.config.js",
     "test": "mocha --require ignore-styles --opts spec/mocha.opts ${FILE:-spec}",
-    "start": "node webpack_server.js",
-    "lint": "eslint ${FILE:-src spec} && echo '\\033[0;32mAll Good\\033[0m' || true",
-    "cover": "nyc --require babel-core/register -a npm test"
-  },
-  "nyc": {
-    "exclude": [
-      "spec",
-      "dist"
-    ],
-    "include": [
-      "src"
-    ]
+    "start": "node webpack_server.js"
   },
   "author": "Benjamin J. Anderson <andeb2804@gmail.com>",
   "license": "UNLICENSED",
@@ -34,24 +23,15 @@
     "babel-preset-react": "^6.5.0",
     "babel-register": "^6.7.2",
     "chai": "^3.5.0",
-    "copy-webpack-plugin": "^4.0.1",
-    "css-loader": "^0.11.0",
     "enzyme": "^2.0.0",
-    "eslint": "^2.7.0",
-    "eslint-config-airbnb": "^6.2.0",
-    "eslint-plugin-react": "^4.3.0",
     "gulp-util": "^3.0.4",
     "ignore-styles": "^4.0.0",
     "jsdom": "^9.4.1",
     "mocha": "^2.4.5",
-    "node-sass": "^3.2.0",
-    "nyc": "^6.4.0",
     "react-addons-test-utils": "^15.2.1",
     "react-hot-loader": "^1.2.5",
-    "sass-loader": "^3.1.1",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
-    "style-loader": "^0.11.0",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
   },

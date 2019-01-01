@@ -3,11 +3,7 @@ var webpack = require("webpack");
 var WebpackDevServer = require("webpack-dev-server");
 var webpackConfig = null;
 
-if (process.env.NODE_ENV === 'production') {
-  webpackConfig = require("./webpack.production.config.js");
-} else {
-  webpackConfig = require("./webpack.config.js");
-}
+webpackConfig = require("./webpack.config.js");
 
 var devServer = new WebpackDevServer(webpack(webpackConfig), {
   contentBase: './public/',

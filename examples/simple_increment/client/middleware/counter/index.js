@@ -1,4 +1,4 @@
-import socketMiddleware from '../../../../dist/';
+import socketMiddleware from 'socket.io-middleware';
 import stateEvents from './state/';
 import clientEvents from './client/';
 import serverEvents from './server/';
@@ -16,5 +16,5 @@ export default socketMiddleware(
   clientActions,
   serverActions,
   stateActions,
-  'CONNECT',
+  'INCREMENT_CONNECT',
 );

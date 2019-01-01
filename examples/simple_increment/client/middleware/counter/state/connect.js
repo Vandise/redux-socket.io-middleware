@@ -1,5 +1,5 @@
 const action = 'connect';
-const dispatch = (store, next, action, socket) => () => {
+const dispatch = (socket, store, next, action) => () => {
   store.dispatch({ type: 'CONNECTED'});
 };
 

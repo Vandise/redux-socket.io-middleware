@@ -1,4 +1,3 @@
-
 var value = 0;
 
 var http = require('http');
@@ -13,13 +12,16 @@ app.listen(44500);
 var io = require('socket.io').listen(app);
 
 io.on('connection', function(socket) {
+
+  console.log('connected', value);
+  
   socket.on('INCREMENT', function(data) {
-    console.log('increment', data);
+    console.log('increment', value, data);
     value += 1;
     socket.emit('SET_VALUE_FROM_SERVER', { value: value });
   });
   socket.on('DECREMENT', function(data) {
-    console.log('decrement', data);
+    console.log('decrement', value, data);
     value -= 1;
     socket.emit('SET_VALUE_FROM_SERVER', { value: value });
   });
