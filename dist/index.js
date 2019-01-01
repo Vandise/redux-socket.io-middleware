@@ -1,107 +1,124 @@
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.socketIOMiddleware = exports.defaultOpts = exports.mockSocket = exports.testClient = undefined;
+exports.socketio = exports.SOCKETS = exports.SOCKET_INITIALIZED = exports.DEFAULT_SOCKETIO_OPTIONS = exports.DEFAULT_CONNECT_EVENT = undefined;
+exports.isInitialized = isInitialized;
+exports.isConnectAction = isConnectAction;
+exports.getSocket = getSocket;
+exports.generateConnectString = generateConnectString;
+exports.onEventOverride = onEventOverride;
+exports.registerStateEvents = registerStateEvents;
+exports.toggleInitStatus = toggleInitStatus;
 
-var _client = require("./testHelpers/client");
+var _ioclient = require('./middleware/ioclient');
 
-Object.defineProperty(exports, "testClient", {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_client).default;
-  }
-});
+var _ioclient2 = _interopRequireDefault(_ioclient);
 
-var _mockSocket = require("./testHelpers/mockSocket");
+var _defaultEvents = require('./state/defaultEvents');
 
-Object.defineProperty(exports, "mockSocket", {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_mockSocket).default;
-  }
-});
+var _defaultEvents2 = require('./client/defaultEvents');
 
-var _socket = require("socket.io-client");
+var _server = require('./middleware/server');
 
-var _socket2 = _interopRequireDefault(_socket);
-
-var _defaultEvents = require("./state/defaultEvents");
-
-var _defaultEvents2 = require("./client/defaultEvents");
+var _server2 = _interopRequireDefault(_server);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var defaultOpts = exports.defaultOpts = {
+var DEFAULT_CONNECT_EVENT = exports.DEFAULT_CONNECT_EVENT = 'CONNECT';
+
+var DEFAULT_SOCKETIO_OPTIONS = exports.DEFAULT_SOCKETIO_OPTIONS = {
   transports: ['websocket']
 };
 
-var initializedSocket = [];
+var SOCKET_INITIALIZED = exports.SOCKET_INITIALIZED = {};
+var SOCKETS = exports.SOCKETS = {};
 
-var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddleware() {
-  var initialSocket = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
-  var dispatchEvents = arguments.length <= 1 || arguments[1] === undefined ? _defaultEvents2.defaultSocketEvents : arguments[1];
-  var listenEvents = arguments.length <= 2 || arguments[2] === undefined ? _defaultEvents2.onSocketEvents : arguments[2];
-  var stateEvents = arguments.length <= 3 || arguments[3] === undefined ? _defaultEvents.initialStateEvents : arguments[3];
-  var connectAction = arguments.length <= 4 || arguments[4] === undefined ? 'CONNECT' : arguments[4];
-  var options = arguments.length <= 5 || arguments[5] === undefined ? defaultOpts : arguments[5];
+function isInitialized(id) {
+  return exports.SOCKET_INITIALIZED[id] || false;
+}
 
+function isConnectAction(action, connectAction, connected) {
+  return action.type === connectAction && !connected;
+};
 
-  var socket = initialSocket;
-  var onEvent = listenEvents;
-  initializedSocket[connectAction] = false;
+function getSocket(id) {
+  return exports.SOCKETS[id] || null;
+};
 
-  var serverEvent = function serverEvent(socket, store, next, action) {
-    return function (event, data) {
-      listenEvents.some(function (e) {
-        if (e.action === event) {
-          e.dispatch(event, data, store.dispatch);
-          return true;
-        }
-        return false;
-      });
-    };
+function generateConnectString(payload) {
+  var connStr = payload.host + ':' + payload.port;
+  if (payload.namespace) {
+    connStr += '/' + payload.namespace;
+  }
+  return connStr;
+};
+
+function onEventOverride(id) {
+  var socket = exports.getSocket(id);
+  var onevent = socket.onevent;
+
+  socket.onevent = function (packet) {
+    var args = packet.data || [];
+    packet.data = ['*'].concat(args);
+    onevent.call(socket, packet);
   };
+};
+
+function registerStateEvents(id, events, redux) {
+  var socket = exports.getSocket(id);
+  events.map(function (evt) {
+    var eventAction = evt.dispatch;
+    socket.on(evt.action.toString(), eventAction(socket, redux.store, redux.next, redux.action));
+  });
+};
+
+function toggleInitStatus(id) {
+  exports.SOCKET_INITIALIZED[id] = !exports.SOCKET_INITIALIZED[id];
+}
+
+var socketio = exports.socketio = function socketio() {
+  var initializedSocket = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+  var clientEvents = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _defaultEvents2.defaultSocketEvents;
+  var serverEvents = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : _defaultEvents2.onSocketEvents;
+  var stateEvents = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : _defaultEvents.initialStateEvents;
+  var connectAction = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : DEFAULT_CONNECT_EVENT;
+  var options = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : DEFAULT_SOCKETIO_OPTIONS;
+
+
+  exports.SOCKET_INITIALIZED[connectAction] = false;
+  exports.SOCKETS[connectAction] = initializedSocket;
+
+  var IO = (0, _ioclient2.default)();
+  var socket = null;
 
   return function (store) {
     return function (next) {
       return function (action) {
-        if (action.type === connectAction && !initializedSocket[connectAction]) {
-          (function () {
-            var nextAction = false;
-            if (socket === null) {
-              nextAction = true;
-              var connStr = action.payload.host + ":" + action.payload.port;
-              if (socket !== null) {
-                socket.close();
-              }
 
-              socket = _socket2.default.connect(connStr, options);
-            }
+        var IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
 
-            var onevent = socket.onevent;
-            socket.onevent = function (packet) {
-              var args = packet.data || [];
-              packet.data = ['*'].concat(args);
-              onevent.call(socket, packet);
-            };
+        if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {
+          var CONN_STRING = exports.generateConnectString(action.payload);
 
-            socket.on('*', serverEvent(socket, store, next, action));
+          exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
+          socket = exports.getSocket(connectAction);
 
-            stateEvents.map(function (evt) {
-              var eventAction = evt.dispatch;
-              socket.on(evt.action.toString(), eventAction(store, next, action, socket));
-            });
-            initializedSocket[connectAction] = true;
-          })();
+          exports.onEventOverride(connectAction);
+          socket.on('*', (0, _server2.default)(serverEvents, store.dispatch));
+          exports.registerStateEvents(connectAction, stateEvents, { store: store, next: next, action: action });
+
+          exports.toggleInitStatus(connectAction);
         }
 
         if (socket != null) {
-          dispatchEvents.map(function (event) {
+          clientEvents.some(function (event) {
             if (action.type === event.action) {
-              return event.dispatch(socket, store, action);
+              event.dispatch(socket, store, action);
+              return true;
             }
+            return false;
           });
         }
 
@@ -111,4 +128,4 @@ var socketIOMiddleware = exports.socketIOMiddleware = function socketIOMiddlewar
   };
 };
 
-exports.default = socketIOMiddleware;
+exports.default = socketio;

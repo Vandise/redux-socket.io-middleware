@@ -25,6 +25,9 @@
     "socket.io-client": "^1.4.8"
   },
   "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.11.4",
     "babel-eslint": "^6.0.2",
     "babel-plugin-syntax-object-rest-spread": "^6.13.0",
     "babel-plugin-transform-object-rest-spread": "^6.8.0",
