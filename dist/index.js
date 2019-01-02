@@ -91,7 +91,6 @@ var socketio = exports.socketio = function socketio() {
   exports.SOCKETS[connectAction] = initializedSocket;
 
   var IO = (0, _ioclient2.default)();
-  var socket = null;
 
   return function (store) {
     return function (next) {
@@ -103,15 +102,16 @@ var socketio = exports.socketio = function socketio() {
           var CONN_STRING = exports.generateConnectString(action.payload);
 
           exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
-          socket = exports.getSocket(connectAction);
+          var _socket = exports.getSocket(connectAction);
 
           exports.onEventOverride(connectAction);
-          socket.on('*', (0, _server2.default)(serverEvents, store.dispatch));
+          _socket.on('*', (0, _server2.default)(serverEvents, store.dispatch));
           exports.registerStateEvents(connectAction, stateEvents, { store: store, next: next, action: action });
 
           exports.toggleInitStatus(connectAction);
         }
 
+        var socket = exports.getSocket(connectAction);
         if (socket != null) {
           clientEvents.some(function (event) {
             if (action.type === event.action) {

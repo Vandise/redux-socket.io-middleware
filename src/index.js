@@ -83,6 +83,7 @@ export const socketio = (
       const CONN_STRING = exports.generateConnectString(action.payload);
 
       exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
+      const socket = exports.getSocket(connectAction);
 
       exports.onEventOverride(connectAction);
       socket.on('*', serverEventHandler(serverEvents, store.dispatch));
@@ -91,7 +92,8 @@ export const socketio = (
       exports.toggleInitStatus(connectAction);
     }
 
-    if (exports.getSocket(connectAction) != null) {
+    const socket = exports.getSocket(connectAction);
+    if (socket != null) {
       clientEvents.some((event) => {
         if (action.type === event.action) {
           event.dispatch(socket, store, action);
