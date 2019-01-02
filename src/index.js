@@ -74,7 +74,6 @@ export const socketio = (
   exports.SOCKETS[connectAction] = initializedSocket;
 
   const IO = getIOClient();
-  let socket = null;
 
   return store => next => action => {
 
@@ -84,7 +83,6 @@ export const socketio = (
       const CONN_STRING = exports.generateConnectString(action.payload);
 
       exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
-      socket = exports.getSocket(connectAction);
 
       exports.onEventOverride(connectAction);
       socket.on('*', serverEventHandler(serverEvents, store.dispatch));
@@ -93,7 +91,7 @@ export const socketio = (
       exports.toggleInitStatus(connectAction);
     }
 
-    if (socket != null) {
+    if (exports.getSocket(connectAction) != null) {
       clientEvents.some((event) => {
         if (action.type === event.action) {
           event.dispatch(socket, store, action);
