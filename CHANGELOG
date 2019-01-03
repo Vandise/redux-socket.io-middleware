@@ -11,3 +11,9 @@ v1.0.0
 * Cleaned up code
 * Serverless unit tests
 * Improved code coverage
+
+v1.0.1
+=======
+* Expose events within the module
+* Allow easier server unit testing through serverEventHandler wildcard event
+* Updated example
