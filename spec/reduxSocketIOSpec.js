@@ -146,6 +146,27 @@ describe('Redux SocketIO Middleware', () => {
   });
 
   /*
+    registerSocketEvents
+  */
+  describe('.registerSocketEvents', () => {
+    it('pushes the events to the module EVENTS object', () => {
+      middleware.registerSocketEvents('test', [], [], []);
+      expect(middleware.EVENTS).to.have.property('test');
+    });
+  });
+
+  /*
+    registerSocketEvents
+  */
+  describe('.getSocketEvents', () => {
+    it('returns an array of events', () => {
+      const testClientEvents = ['test', 'test2'];
+      middleware.registerSocketEvents('test', testClientEvents, [], []);
+      expect(middleware.getSocketEvents('test', middleware.CLIENT_EVENT_KEY)).to.equal(testClientEvents);
+    });
+  });
+
+  /*
     socketio
   */
   describe('.socketio', () => {
@@ -160,6 +181,11 @@ describe('Redux SocketIO Middleware', () => {
         const MOCK_SOCKET = { id: 'SOCKET_3_TEST' };
         middleware.socketio(MOCK_SOCKET);
         expect(middleware.SOCKETS).to.have.keys(DEFAULT_ID);
+      });
+
+      it('registers the events to the module', () => {
+        middleware.socketio();
+        expect(middleware.EVENTS).to.have.property(DEFAULT_ID);
       });
     });
 
