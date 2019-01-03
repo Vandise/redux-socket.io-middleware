@@ -44,6 +44,7 @@
     "redux-actions": "^0.10.1",
     "socket.io-middleware": "https://github.com/Vandise/redux-socket.io-middleware/archive/master.tar.gz",
     "redux-thunk": "^2.1.0",
-    "socket.io": "^1.7.2"
+    "socket.io": "^1.7.2",
+    "testdouble": "^3.2.5"
   }
 }

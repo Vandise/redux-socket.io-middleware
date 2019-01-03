@@ -100,7 +100,6 @@ export const socketio = (
   const IO = getIOClient();
 
   return store => next => action => {
-
     const IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
 
     if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {

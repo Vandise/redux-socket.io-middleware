@@ -122,7 +122,6 @@ var socketio = exports.socketio = function socketio() {
   return function (store) {
     return function (next) {
       return function (action) {
-
         var IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
 
         if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {
