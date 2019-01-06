@@ -229,6 +229,52 @@ The sockets follow all the same configurations as specified in the socket.io doc
 
 You can learn more from the provided example.
 
+### Unit Testing
+The middleware exposes the module state containing the socket connection status and socket reference. This allows you to test your socket middleware *without the need for a real socket connection.* You can mock the socket and connection status like so ( see the example in the examples directory for context ):
+
+```js
+  const counterModule = require('../client/middleware/counter');
+  const socketModule = counterModule.middleware;
+  const mockMiddleware = counterModule.default;
+  const id = counterModule.id;
+  const mockSocket = { emit: sinon.spy() };
+
+  socketModule.SOCKETS[id] = mockSocket;
+  socketModule.toggleInitStatus(id);  
+```
+
+#### Client Events
+To mock client events, you can pass in the action to the middleware.
+
+```js
+  describe('INCREMENT', () => {
+    it('emits the event to the server', () => {
+      mockMiddleware(store)(() => true)({ type: 'INCREMENT' });
+      expect(mockSocket.emit).to.have.been.calledWith('INCREMENT');
+    });
+  });
+```
+
+#### Server Events
+Server events operate differently than client events. The socket listens for a wildcard, `*`, event and transitions through the list of server events and dispatches the function if there's a match. To execute a server event, the action type must be a wildcard. The payload must contain a `type` specifying the message type and an optional `data` attribute containing any socket data:
+
+```js
+  describe('SET_VALUE_FROM_SERVER', () => {
+    it('is handled by the middleware', () => {
+      mockMiddleware(store)(() => true)({
+        type: '*', payload: {
+          type: 'SET_VALUE_FROM_SERVER',
+          data: { value: 1 }  
+        }
+      });
+      // check that the SET_VALUE_FROM_SERVER handler executed
+      expect(store.dispatch).to.have.been.called;
+    });
+  });
+```
+
+You can also check that the message updates the store state as opposed to stubbing `dispatch`.
+
 ## Contributing
 
 Send a pull request noting the change, why it's required, and assign to Vandise. Current on-going issues include:
