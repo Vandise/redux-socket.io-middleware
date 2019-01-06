@@ -57,12 +57,29 @@ describe('Counter Middleware', () => {
     describe('SET_VALUE_FROM_SERVER', () => {
       it('is handled by the middleware', () => {
         mockMiddleware(store)(() => true)({
-          type: '*', payload: {
+          type: `${id}_*`, payload: {
             type: 'SET_VALUE_FROM_SERVER',
             data: { value: 1 }  
           }
         });
         expect(store.dispatch).to.have.been.called;
+      });
+    });
+  });
+
+  describe('State Events', () => {
+    beforeEach(() => {
+      td.replace(store, 'dispatch', sinon.spy());
+    });
+
+    describe('connect', () => {
+      it('dispatches the connected action', () => {
+        mockMiddleware(store)(() => true)({
+          type: `${id}_state`, payload: {
+            type: 'connect'
+          }
+        });
+        expect(store.dispatch).to.have.been.calledWith({ type: 'CONNECTED'});
       });
     });
   });

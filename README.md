@@ -229,7 +229,7 @@ The sockets follow all the same configurations as specified in the socket.io doc
 
 You can learn more from the provided example.
 
-### Unit Testing
+## Unit Testing
 The middleware exposes the module state containing the socket connection status and socket reference. This allows you to test your socket middleware *without the need for a real socket connection.* You can mock the socket and connection status like so ( see the example in the examples directory for context ):
 
 ```js
@@ -243,7 +243,7 @@ The middleware exposes the module state containing the socket connection status 
   socketModule.toggleInitStatus(id);  
 ```
 
-#### Client Events
+### Client Events
 To mock client events, you can pass in the action to the middleware.
 
 ```js
@@ -255,14 +255,14 @@ To mock client events, you can pass in the action to the middleware.
   });
 ```
 
-#### Server Events
-Server events operate differently than client events. The socket listens for a wildcard, `*`, event and transitions through the list of server events and dispatches the function if there's a match. To execute a server event, the action type must be a wildcard. The payload must contain a `type` specifying the message type and an optional `data` attribute containing any socket data:
+### Server Events
+Server events operate differently than client events. The socket listens for a wildcard, `socketid_*`, event and transitions through the list of server events and dispatches the function if there's a match. To execute a server event, the action type must be a wildcard. The payload must contain a `type` specifying the message type and an optional `data` attribute containing any socket data:
 
 ```js
   describe('SET_VALUE_FROM_SERVER', () => {
     it('is handled by the middleware', () => {
       mockMiddleware(store)(() => true)({
-        type: '*', payload: {
+        type: '${id}_*', payload: {
           type: 'SET_VALUE_FROM_SERVER',
           data: { value: 1 }  
         }
@@ -275,13 +275,25 @@ Server events operate differently than client events. The socket listens for a w
 
 You can also check that the message updates the store state as opposed to stubbing `dispatch`.
 
+### State Events
+State events follow the same format as server events, except instead of a wildcard event, it's looking for a `socketid_state` event:
+
+```js
+  describe('connect', () => {
+    it('dispatches the connected action', () => {
+      mockMiddleware(store)(() => true)({
+        type: '${id}_state', payload: {
+          type: 'connect'
+        }
+      });
+      expect(store.dispatch).to.have.been.calledWith({ type: 'CONNECTED'});
+    });
+  });
+```
+
 ## Contributing
 
-Send a pull request noting the change, why it's required, and assign to Vandise. Current on-going issues include:
-- Standardizing the socket message interfaces so functions are concise between message types.
-- Implementing a function within the core middleware that will check if a server event has executed (as opposed to having the user check)
-- Add package documentation
-- Add working example
+Send a pull request noting the change, why it's required, and assign to Vandise.
 
 ## License
 GPL v3.0

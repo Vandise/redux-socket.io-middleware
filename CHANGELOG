@@ -15,5 +15,5 @@ v1.0.0
 v1.0.1
 =======
 * Expose events within the module
-* Allow easier server unit testing through serverEventHandler wildcard event
+* Allow easier unit testing through event handlers
 * Updated example

@@ -122,19 +122,32 @@ export const socketio = (
 
     const socket = exports.getSocket(connectAction);
     if (socket != null) {
-      if (action.type == SERVER_EVENT) {
-        serverEventHandler(exports.getSocketEvents(connectAction, SERVER_EVENT_KEY),
-          store.dispatch
-        )(action.payload.type, action.payload.data);
-      }
+      switch(action.type) {
+        case `${connectAction}_${SERVER_EVENT}`:
+          serverEventHandler(exports.getSocketEvents(connectAction, SERVER_EVENT_KEY),
+            store.dispatch
+          )(action.payload.type, action.payload.data);
+          break;
 
-      exports.getSocketEvents(connectAction, CLIENT_EVENT_KEY).some((event) => {
-        if (action.type === event.action) {
-          event.dispatch(socket, store, action);
-          return true;
-        }
-        return false;
-      });
+        case `${connectAction}_${STATE_EVENT_KEY}`:
+          exports.getSocketEvents(connectAction, STATE_EVENT_KEY).some((evt) => {
+            if (evt.action.toString() === action.payload.type) {
+              evt.dispatch(socket, store, next, action)();
+              return true;
+            }
+            return false;
+          });         
+          break;
+
+        default:
+          exports.getSocketEvents(connectAction, CLIENT_EVENT_KEY).some((event) => {
+            if (action.type === event.action) {
+              event.dispatch(socket, store, action);
+              return true;
+            }
+            return false;
+          });
+      }
     }
 
     return next(action);
