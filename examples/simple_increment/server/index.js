@@ -14,7 +14,7 @@ var io = require('socket.io').listen(app);
 io.on('connection', function(socket) {
 
   console.log('connected', value);
-  
+
   socket.on('INCREMENT', function(data) {
     console.log('increment', value, data);
     value += 1;
@@ -24,5 +24,9 @@ io.on('connection', function(socket) {
     console.log('decrement', value, data);
     value -= 1;
     socket.emit('SET_VALUE_FROM_SERVER', { value: value });
+  });
+
+  socket.on('disconnect', function() {
+    console.log('Got disconnect!');
   });
 });

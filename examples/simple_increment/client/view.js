@@ -26,6 +26,10 @@ const Menu = class extends React.Component {
               className='decrement-button'
               onClick={() => props.dispatch(actions.DECREMENT())}
             >Decrement</button>
+            <button
+              className='disconnect-button'
+              onClick={() => props.dispatch(actions.INCREMENT_DISCONNECT())}
+            >Disconnect</button>
           </div>
         </div>
       );
