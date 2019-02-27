@@ -25,6 +25,8 @@ Various socket message types, such as `server` messages, `client` messages, and 
 have to utilize a specific export format. This is due to the limited interfacing capabilities with socket.io.
 In the future, different message types may become more standardized.
 
+More specific examples and advanced usage can be found in the [Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki).
+
 ### Formatting Your Directory Structure
 Utilizing the following directory structure creates an easy-to-test and predictable environment by separating server messages, from client.
 

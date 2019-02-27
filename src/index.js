@@ -136,7 +136,7 @@ export const socketio = (
               return true;
             }
             return false;
-          });         
+          });
           break;
 
         default:
