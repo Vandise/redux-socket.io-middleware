@@ -22,8 +22,8 @@ export function isInitialized(id) {
   return exports.SOCKET_INITIALIZED[id] || false;
 }
 
-export function isConnectAction(action, connectAction, connected) {
-  return action.type === connectAction && !connected;
+export function isConnectAction(action, id, connected) {
+  return action.type === `${id}_CONNECT` && !connected;
 };
 
 export function getSocket(id) {

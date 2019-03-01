@@ -32,7 +32,7 @@ describe('Redux SocketIO Middleware', () => {
     store = {};
     next = () => true;
     action = {
-      type: DEFAULT_ID,
+      type: `${DEFAULT_ID}_CONNECT`,
     };
   });
 
@@ -48,13 +48,13 @@ describe('Redux SocketIO Middleware', () => {
     const ACTION = { type: 'SOCKET_1_CONNECT' };
 
     describe('when the action type is the connect event', () => {
-      const EVENT = 'SOCKET_1_CONNECT';
+      const ID = 'SOCKET_1';
 
       describe('and the socket has not been connected', () => {
         const CONNECTED = false;
 
         it('returns true', () => {
-          expect(middleware.isConnectAction(ACTION, EVENT, CONNECTED)).to.equal(true);
+          expect(middleware.isConnectAction(ACTION, ID, CONNECTED)).to.equal(true);
         });
       });
 
@@ -62,16 +62,16 @@ describe('Redux SocketIO Middleware', () => {
         const CONNECTED = true;
 
         it('returns false', () => {
-          expect(middleware.isConnectAction(ACTION, EVENT, CONNECTED)).to.equal(false);
+          expect(middleware.isConnectAction(ACTION, ID, CONNECTED)).to.equal(false);
         });
       });
     });
 
     describe('when the action type is not the connect event', () => {
-      const EVENT = 'SOCKET_2_CONNECT';
+      const ID = 'SOCKET_2';
 
       it('returns false', () => {
-        expect(middleware.isConnectAction(ACTION, EVENT, false)).to.equal(false);
+        expect(middleware.isConnectAction(ACTION, ID, false)).to.equal(false);
       });
     });
   });
