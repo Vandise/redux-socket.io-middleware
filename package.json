@@ -1,6 +1,6 @@
 {
   "name": "socket.io-middleware",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A socket.io redux middleware wrapper for maintaining multiple socket connections.",
   "main": "dist/index.js",
   "repository": "https://github.com/Vandise/redux-socket.io-middleware",

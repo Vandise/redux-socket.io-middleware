@@ -27,7 +27,7 @@ describe('Redux SocketIO Middleware', () => {
     DEFAULT_ID = middleware.DEFAULT_CONNECT_EVENT;
     td.replace(middleware, 'SOCKET_INITIALIZED', {});
     td.replace(middleware, 'SOCKETS', {});
-  
+
     store = {};
     next = () => true;
     action = {
@@ -63,7 +63,7 @@ describe('Redux SocketIO Middleware', () => {
         it('returns false', () => {
           expect(middleware.isConnectAction(ACTION, EVENT, CONNECTED)).to.equal(false);
         });
-      });    
+      });
     });
 
     describe('when the action type is not the connect event', () => {
@@ -77,7 +77,7 @@ describe('Redux SocketIO Middleware', () => {
 
   /*
     getSocket
-  */ 
+  */
   describe('.getSocket', () => {
     const CONN_ACTION = 'SOCKET_1_CONNECT';
     const TEST_SOCKET = { id: 'test_socket_id' };
@@ -124,7 +124,7 @@ describe('Redux SocketIO Middleware', () => {
 
   /*
     isInitialized
-  */ 
+  */
   describe('.isInitialized', () => {
     describe('when present', () => {
       beforeEach(() => {
@@ -247,6 +247,19 @@ describe('Redux SocketIO Middleware', () => {
           testMiddleware(store)(next)({ type: 'TEST' });
 
           expect(event.dispatch).to.have.been.called;
+        });
+      });
+
+      describe('and SocketName_DISCONNECT is called', () => {
+        it('calls .disconnect on the socket', () => {
+          const socket = { disconnect: sinon.spy() };
+          const testMiddleware = middleware.socketio(socket);
+
+          testMiddleware(store)(next)(action);
+          // id = CONNECT
+          testMiddleware(store)(next)({ type: 'CONNECT_DISCONNECT' });
+
+          expect(socket.disconnect).to.have.been.called;
         });
       });
     });

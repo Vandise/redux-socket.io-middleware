@@ -139,6 +139,10 @@ export const socketio = (
           });
           break;
 
+        case `${connectAction}_DISCONNECT`:
+          socket.disconnect();
+          break;
+
         default:
           exports.getSocketEvents(connectAction, CLIENT_EVENT_KEY).some((event) => {
             if (action.type === event.action) {
