@@ -125,7 +125,7 @@ export const socketio = (
     }
 
     const socket = exports.getSocket(connectAction);
-    if (socket != null) {
+    if (socket != null && exports.getInitStatus(connectAction) === true) {
       switch(action.type) {
         case `${connectAction}_${SERVER_EVENT}`:
           serverEventHandler(exports.getSocketEvents(connectAction, SERVER_EVENT_KEY),
