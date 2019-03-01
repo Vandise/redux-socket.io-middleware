@@ -171,12 +171,13 @@ export const server = serverEvents;
 
 After which, we need to configure the middleware to be aware of these events and the `connect message` that will be sent from redux.
 
+**Note:** to have your socket connect to the server, you must dispatch a `${socket_id}_CONNECT` event. More specific examples and advanced usage can be found in the [Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki).
+
 >middleware/myMiddlewareName.js
 
 ```javascript
 
 import socketMiddleware from 'socket.io-middleware';
-import { CONNECT } from './constants/messages/connect';
 import * as EVENTS from './myMiddlewareName/';
 
 const initialSocket = null;
@@ -185,14 +186,14 @@ const initialSocket = null;
 export const client = EVENTS.client;
 export const server = EVENTS.server;
 export const state = EVENTS.state;
-export const event = CONNECT;
+export const socket_id = 'COUNTER';
 
 export default socketMiddleware(
   initialSocket,     /* unless a socket.io instance is already connected */
   EVENTS.client,
   EVENTS.server,
   EVENTS.state,
-  CONNECT,           /* connect action to be sent by redux to initialize the socket */
+  socket_id,           /* connect action to be sent by redux to initialize the socket */
   /* options */      /* this also serves as a unique idendifier for multiple socket applications */
 );
 
@@ -285,7 +286,7 @@ State events follow the same format as server events, except instead of a wildca
     it('dispatches the connected action', () => {
       mockMiddleware(store)(() => true)({
         type: '${id}_state', payload: {
-          type: 'connect'
+          type: 'socketid_connect'
         }
       });
       expect(store.dispatch).to.have.been.calledWith({ type: 'CONNECTED'});
