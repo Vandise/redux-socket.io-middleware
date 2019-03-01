@@ -9,7 +9,7 @@ export const clientActions = clientEvents;
 export const serverActions = serverEvents;
 
 export const middleware = socketMiddleware;
-export const id = 'INCREMENT_CONNECT';
+export const id = 'INCREMENT';
 
 const initialSocket = null;
 
