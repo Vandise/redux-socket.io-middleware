@@ -66,6 +66,10 @@ export function toggleInitStatus(id) {
   exports.SOCKET_INITIALIZED[id] = !exports.SOCKET_INITIALIZED[id];
 }
 
+export function getInitStatus(id) {
+  return exports.SOCKET_INITIALIZED[id];
+}
+
 export function registerServerEvents(id, events, dispatch) {
   const socket = exports.getSocket(id);
 
@@ -102,7 +106,7 @@ export const socketio = (
   return store => next => action => {
     const IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
 
-    if (IS_CONNECT_ACTION && exports.getSocket(connectAction) === null) {
+    if (IS_CONNECT_ACTION && (exports.getSocket(connectAction) === null || exports.getInitStatus(connectAction) === false )) {
       const CONN_STRING = exports.generateConnectString(action.payload);
 
       exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
@@ -141,6 +145,7 @@ export const socketio = (
 
         case `${connectAction}_DISCONNECT`:
           socket.disconnect();
+          exports.toggleInitStatus(connectAction);
           break;
 
         default:

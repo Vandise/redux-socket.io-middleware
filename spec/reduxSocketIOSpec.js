@@ -15,6 +15,7 @@ describe('Redux SocketIO Middleware', () => {
       id: 'test-socket',
       onevent: sinon.spy(),
       on: sinon.spy(),
+      disconnect: sinon.spy(),
     };
 
     mockClient = {
@@ -251,15 +252,26 @@ describe('Redux SocketIO Middleware', () => {
       });
 
       describe('and SocketName_DISCONNECT is called', () => {
+        beforeEach(() => {
+          action = Object.assign({}, action, { payload: { host: 'test', port: 1234 } });
+        });
+
         it('calls .disconnect on the socket', () => {
-          const socket = { disconnect: sinon.spy() };
-          const testMiddleware = middleware.socketio(socket);
+          const testMiddleware = middleware.socketio(mockSocket);
 
           testMiddleware(store)(next)(action);
-          // id = CONNECT
-          testMiddleware(store)(next)({ type: 'CONNECT_DISCONNECT' });
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
 
-          expect(socket.disconnect).to.have.been.called;
+          expect(mockSocket.disconnect).to.have.been.called;
+        });
+
+        it('sets the status to uninitialized', () => {
+          const testMiddleware = middleware.socketio(mockSocket);
+
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
+
+          expect(middleware.getInitStatus(DEFAULT_ID)).to.equal(false);
         });
       });
     });
