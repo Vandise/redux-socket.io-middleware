@@ -107,19 +107,24 @@ export const socketio = (
     const IS_CONNECT_ACTION = exports.isConnectAction(action, id, exports.SOCKET_INITIALIZED[id]);
 
     if (IS_CONNECT_ACTION) {
-      const CONN_STRING = exports.generateConnectString(action.payload);
+      if (exports.getSocket(id) === null) {
+        const CONN_STRING = exports.generateConnectString(action.payload);
 
-      exports.SOCKETS[id] = IO.connect(CONN_STRING, options);
+        exports.SOCKETS[id] = IO.connect(CONN_STRING, options);
 
-      exports.registerServerEvents(id,
-        exports.getSocketEvents(id, SERVER_EVENT_KEY),
-        store.dispatch
-      );
+        exports.registerServerEvents(id,
+          exports.getSocketEvents(id, SERVER_EVENT_KEY),
+          store.dispatch
+        );
 
-      exports.registerStateEvents(id,
-        exports.getSocketEvents(id, STATE_EVENT_KEY),
-        { store, next, action }
-      );
+        exports.registerStateEvents(id,
+          exports.getSocketEvents(id, STATE_EVENT_KEY),
+          { store, next, action }
+        );
+      } else {
+        const socket = exports.getSocket(id);
+        socket.connect();
+      }
 
       exports.toggleInitStatus(id);
     }

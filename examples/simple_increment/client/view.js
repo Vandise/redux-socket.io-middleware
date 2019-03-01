@@ -30,6 +30,10 @@ const Menu = class extends React.Component {
               className='disconnect-button'
               onClick={() => props.dispatch(actions.INCREMENT_DISCONNECT())}
             >Disconnect</button>
+            <button
+              className='connect-button'
+              onClick={() => props.dispatch(actions.INCREMENT_CONNECT('localhost', 44500))}
+            >Connect</button>
           </div>
         </div>
       );

@@ -16,6 +16,7 @@ describe('Redux SocketIO Middleware', () => {
       onevent: sinon.spy(),
       on: sinon.spy(),
       disconnect: sinon.spy(),
+      connect: sinon.spy()
     };
 
     mockClient = {
@@ -235,6 +236,21 @@ describe('Redux SocketIO Middleware', () => {
         it('sets the init status to true', () => {
           middleware.socketio()(store)(next)(action);
           expect(middleware.isInitialized(DEFAULT_ID)).to.equal(true);
+        });
+      });
+
+      describe('and the socket is already present', () => {
+
+        it('calls connect on the initialized socket', () => {
+          const testMiddleware = middleware.socketio(mockSocket);
+
+          // initialize / connect
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
+          // reconnect
+          testMiddleware(store)(next)(action);
+
+          expect(mockSocket.connect).to.have.been.called;
         });
       });
     });
