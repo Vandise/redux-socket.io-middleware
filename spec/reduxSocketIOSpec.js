@@ -167,6 +167,14 @@ describe('Redux SocketIO Middleware', () => {
     });
   });
 
+  describe('.getInitStatus', () => {
+    it('returns the socket status', () => {
+      middleware.SOCKET_INITIALIZED[DEFAULT_ID] = false;
+
+      expect(middleware.getInitStatus(DEFAULT_ID)).to.equal(false);
+    });
+  });
+
   /*
     socketio
   */
