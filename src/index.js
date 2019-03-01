@@ -106,7 +106,7 @@ export const socketio = (
   return store => next => action => {
     const IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
 
-    if (IS_CONNECT_ACTION && (exports.getSocket(connectAction) === null || exports.getInitStatus(connectAction) === false )) {
+    if (IS_CONNECT_ACTION) {
       const CONN_STRING = exports.generateConnectString(action.payload);
 
       exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
