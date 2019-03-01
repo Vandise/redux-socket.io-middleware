@@ -4,7 +4,7 @@ import { defaultSocketEvents } from './client/defaultEvents';
 import { onSocketEvents } from './client/defaultEvents';
 import serverEventHandler from './middleware/server';
 
-export const DEFAULT_CONNECT_EVENT = 'CONNECT';
+export const DEFAULT_SOCKET_ID = 'DEFAULT';
 export const CLIENT_EVENT_KEY = 'client';
 export const SERVER_EVENT_KEY = 'server';
 export const STATE_EVENT_KEY = 'state';
@@ -93,48 +93,48 @@ export const socketio = (
   clientEvents = defaultSocketEvents,
   serverEvents = onSocketEvents,
   stateEvents = initialStateEvents,
-  connectAction = DEFAULT_CONNECT_EVENT,
+  id = DEFAULT_SOCKET_ID,
   options = DEFAULT_SOCKETIO_OPTIONS
 ) => {
 
-  exports.SOCKET_INITIALIZED[connectAction] = false;
-  exports.SOCKETS[connectAction] = initializedSocket;
-  exports.registerSocketEvents(connectAction, clientEvents, serverEvents, stateEvents);
+  exports.SOCKET_INITIALIZED[id] = false;
+  exports.SOCKETS[id] = initializedSocket;
+  exports.registerSocketEvents(id, clientEvents, serverEvents, stateEvents);
 
   const IO = getIOClient();
 
   return store => next => action => {
-    const IS_CONNECT_ACTION = exports.isConnectAction(action, connectAction, exports.SOCKET_INITIALIZED[connectAction]);
+    const IS_CONNECT_ACTION = exports.isConnectAction(action, id, exports.SOCKET_INITIALIZED[id]);
 
     if (IS_CONNECT_ACTION) {
       const CONN_STRING = exports.generateConnectString(action.payload);
 
-      exports.SOCKETS[connectAction] = IO.connect(CONN_STRING, options);
+      exports.SOCKETS[id] = IO.connect(CONN_STRING, options);
 
-      exports.registerServerEvents(connectAction,
-        exports.getSocketEvents(connectAction, SERVER_EVENT_KEY),
+      exports.registerServerEvents(id,
+        exports.getSocketEvents(id, SERVER_EVENT_KEY),
         store.dispatch
       );
 
-      exports.registerStateEvents(connectAction,
-        exports.getSocketEvents(connectAction, STATE_EVENT_KEY),
+      exports.registerStateEvents(id,
+        exports.getSocketEvents(id, STATE_EVENT_KEY),
         { store, next, action }
       );
 
-      exports.toggleInitStatus(connectAction);
+      exports.toggleInitStatus(id);
     }
 
-    const socket = exports.getSocket(connectAction);
-    if (socket != null && exports.getInitStatus(connectAction) === true) {
+    const socket = exports.getSocket(id);
+    if (socket != null && exports.getInitStatus(id) === true) {
       switch(action.type) {
-        case `${connectAction}_${SERVER_EVENT}`:
-          serverEventHandler(exports.getSocketEvents(connectAction, SERVER_EVENT_KEY),
+        case `${id}_${SERVER_EVENT}`:
+          serverEventHandler(exports.getSocketEvents(id, SERVER_EVENT_KEY),
             store.dispatch
           )(action.payload.type, action.payload.data);
           break;
 
-        case `${connectAction}_${STATE_EVENT_KEY}`:
-          exports.getSocketEvents(connectAction, STATE_EVENT_KEY).some((evt) => {
+        case `${id}_${STATE_EVENT_KEY}`:
+          exports.getSocketEvents(id, STATE_EVENT_KEY).some((evt) => {
             if (evt.action.toString() === action.payload.type) {
               evt.dispatch(socket, store, next, action)();
               return true;
@@ -143,13 +143,13 @@ export const socketio = (
           });
           break;
 
-        case `${connectAction}_DISCONNECT`:
+        case `${id}_DISCONNECT`:
           socket.disconnect();
-          exports.toggleInitStatus(connectAction);
+          exports.toggleInitStatus(id);
           break;
 
         default:
-          exports.getSocketEvents(connectAction, CLIENT_EVENT_KEY).some((event) => {
+          exports.getSocketEvents(id, CLIENT_EVENT_KEY).some((event) => {
             if (action.type === event.action) {
               event.dispatch(socket, store, action);
               return true;

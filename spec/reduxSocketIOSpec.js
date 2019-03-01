@@ -25,7 +25,7 @@ describe('Redux SocketIO Middleware', () => {
     td.replace('../src/middleware/ioclient', () => mockClient);
 
     middleware = require('../src/index');
-    DEFAULT_ID = middleware.DEFAULT_CONNECT_EVENT;
+    DEFAULT_ID = middleware.DEFAULT_SOCKET_ID;
     td.replace(middleware, 'SOCKET_INITIALIZED', {});
     td.replace(middleware, 'SOCKETS', {});
 
