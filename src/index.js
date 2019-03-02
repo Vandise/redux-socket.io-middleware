@@ -263,6 +263,9 @@ export function socketio(
   options = DEFAULT_SOCKETIO_OPTIONS
 ) {
 
+  //
+  // Keep track of the socket state and functions used
+  //
   exports.SOCKET_INITIALIZED[id] = false;
   exports.SOCKETS[id] = initializedSocket;
   exports.registerSocketEvents(id, clientEvents, serverEvents, stateEvents);
@@ -272,7 +275,12 @@ export function socketio(
   return store => next => action => {
     const IS_CONNECT_ACTION = exports.isConnectAction(action, id, exports.SOCKET_INITIALIZED[id]);
 
+    // got socketID_CONNECT event
     if (IS_CONNECT_ACTION) {
+
+      //
+      // If no socket has been initialized
+      //
       if (exports.getSocket(id) === null) {
         const CONN_STRING = exports.generateConnectString(action.payload);
 
@@ -287,23 +295,38 @@ export function socketio(
           exports.getSocketEvents(id, STATE_EVENT_KEY),
           { store, next, action }
         );
+
+      //
+      // Socket has been initialized, but is disconnected
+      //
       } else {
         const socket = exports.getSocket(id);
         socket.connect();
       }
 
+      //
+      // Toggle status from disconnected, to connected ( false -> true )
+      //
       exports.toggleInitStatus(id);
     }
 
     const socket = exports.getSocket(id);
+
     if (socket != null && exports.getInitStatus(id) === true) {
       switch(action.type) {
+
+        //
+        // Server Events
+        //
         case `${id}_${SERVER_EVENT}`:
           serverEventHandler(exports.getSocketEvents(id, SERVER_EVENT_KEY),
             store.dispatch
           )(action.payload.type, action.payload.data);
           break;
 
+        //
+        // State Events
+        //
         case `${id}_${STATE_EVENT_KEY}`:
           exports.getSocketEvents(id, STATE_EVENT_KEY).some((evt) => {
             if (evt.action.toString() === action.payload.type) {
@@ -314,11 +337,17 @@ export function socketio(
           });
           break;
 
+        //
+        // socketID_DISCONNECT ( disconnect event )
+        //
         case `${id}_DISCONNECT`:
           socket.disconnect();
           exports.toggleInitStatus(id);
           break;
 
+        //
+        // Client Events
+        //
         default:
           exports.getSocketEvents(id, CLIENT_EVENT_KEY).some((event) => {
             if (action.type === event.action) {
