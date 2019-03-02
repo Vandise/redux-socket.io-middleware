@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "rm -rf dist && mkdir dist && babel src --out-dir dist/",
-    "test": "mocha --opts spec/mocha.opts ${FILE:-spec}"
+    "test": "mocha --opts spec/mocha.opts ${FILE:-spec}",
+    "doc": "./node_modules/.bin/jsdoc src/index.js -d docs"
   },
   "keywords": [
     "redux",
@@ -40,6 +41,7 @@
     "eslint-plugin-babel": "^3.1.0",
     "eslint-plugin-react": "^4.2.3",
     "expect": "^1.14.0",
+    "jsdoc": "^3.5.5",
     "mocha": "^2.3.3",
     "redux-actions": "^0.11.0",
     "sinon-chai": "^2.8.0",
