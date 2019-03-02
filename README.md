@@ -1,4 +1,4 @@
-# redux-socket.io-middleware [![Build Status](https://travis-ci.org/Vandise/redux-socket.io-middleware.svg?branch=master)](https://travis-ci.org/Vandise/redux-socket.io-middleware) [![Downloads](https://img.shields.io/npm/dt/redux-socket.io-middleware.svg)](https://www.npmjs.com/package/redux-socket.io-middleware)
+# redux-socket.io-middleware [![Build Status](https://travis-ci.org/Vandise/redux-socket.io-middleware.svg?branch=master)](https://travis-ci.org/Vandise/redux-socket.io-middleware) [![Downloads](https://img.shields.io/npm/dt/socket.io-middleware.svg)](https://www.npmjs.com/package/socket.io-middleware)
 An implementation of a generic socket.io middleware. Implemented with the notion that the application will be utilizing multiple sockets.
 
 ## Introduction
@@ -171,12 +171,13 @@ export const server = serverEvents;
 
 After which, we need to configure the middleware to be aware of these events and the `connect message` that will be sent from redux.
 
+**Note:** to have your socket connect to the server, you must dispatch a `${socket_id}_CONNECT` event. More specific examples and advanced usage can be found in the [Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki).
+
 >middleware/myMiddlewareName.js
 
 ```javascript
 
 import socketMiddleware from 'socket.io-middleware';
-import { CONNECT } from './constants/messages/connect';
 import * as EVENTS from './myMiddlewareName/';
 
 const initialSocket = null;
@@ -185,14 +186,14 @@ const initialSocket = null;
 export const client = EVENTS.client;
 export const server = EVENTS.server;
 export const state = EVENTS.state;
-export const event = CONNECT;
+export const socket_id = 'COUNTER';
 
 export default socketMiddleware(
   initialSocket,     /* unless a socket.io instance is already connected */
   EVENTS.client,
   EVENTS.server,
   EVENTS.state,
-  CONNECT,           /* connect action to be sent by redux to initialize the socket */
+  socket_id,           /* connect action to be sent by redux to initialize the socket */
   /* options */      /* this also serves as a unique idendifier for multiple socket applications */
 );
 
@@ -285,7 +286,7 @@ State events follow the same format as server events, except instead of a wildca
     it('dispatches the connected action', () => {
       mockMiddleware(store)(() => true)({
         type: '${id}_state', payload: {
-          type: 'connect'
+          type: 'socketid_connect'
         }
       });
       expect(store.dispatch).to.have.been.calledWith({ type: 'CONNECTED'});
@@ -298,6 +299,31 @@ State events follow the same format as server events, except instead of a wildca
 Send a pull request noting the change, why it's required, and assign to Vandise.
 
 ## License
+v1.X
 GPL v3.0
 
 Any updates or enhancements to this package must be open-source.
+
+v2.X
+
+MIT License
+
+Copyright (c) 2019 Benjamin J. Anderson
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

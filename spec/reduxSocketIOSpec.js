@@ -15,6 +15,8 @@ describe('Redux SocketIO Middleware', () => {
       id: 'test-socket',
       onevent: sinon.spy(),
       on: sinon.spy(),
+      disconnect: sinon.spy(),
+      connect: sinon.spy()
     };
 
     mockClient = {
@@ -24,14 +26,14 @@ describe('Redux SocketIO Middleware', () => {
     td.replace('../src/middleware/ioclient', () => mockClient);
 
     middleware = require('../src/index');
-    DEFAULT_ID = middleware.DEFAULT_CONNECT_EVENT;
+    DEFAULT_ID = middleware.DEFAULT_SOCKET_ID;
     td.replace(middleware, 'SOCKET_INITIALIZED', {});
     td.replace(middleware, 'SOCKETS', {});
-  
+
     store = {};
     next = () => true;
     action = {
-      type: DEFAULT_ID,
+      type: `${DEFAULT_ID}_CONNECT`,
     };
   });
 
@@ -47,13 +49,13 @@ describe('Redux SocketIO Middleware', () => {
     const ACTION = { type: 'SOCKET_1_CONNECT' };
 
     describe('when the action type is the connect event', () => {
-      const EVENT = 'SOCKET_1_CONNECT';
+      const ID = 'SOCKET_1';
 
       describe('and the socket has not been connected', () => {
         const CONNECTED = false;
 
         it('returns true', () => {
-          expect(middleware.isConnectAction(ACTION, EVENT, CONNECTED)).to.equal(true);
+          expect(middleware.isConnectAction(ACTION, ID, CONNECTED)).to.equal(true);
         });
       });
 
@@ -61,23 +63,23 @@ describe('Redux SocketIO Middleware', () => {
         const CONNECTED = true;
 
         it('returns false', () => {
-          expect(middleware.isConnectAction(ACTION, EVENT, CONNECTED)).to.equal(false);
+          expect(middleware.isConnectAction(ACTION, ID, CONNECTED)).to.equal(false);
         });
-      });    
+      });
     });
 
     describe('when the action type is not the connect event', () => {
-      const EVENT = 'SOCKET_2_CONNECT';
+      const ID = 'SOCKET_2';
 
       it('returns false', () => {
-        expect(middleware.isConnectAction(ACTION, EVENT, false)).to.equal(false);
+        expect(middleware.isConnectAction(ACTION, ID, false)).to.equal(false);
       });
     });
   });
 
   /*
     getSocket
-  */ 
+  */
   describe('.getSocket', () => {
     const CONN_ACTION = 'SOCKET_1_CONNECT';
     const TEST_SOCKET = { id: 'test_socket_id' };
@@ -124,7 +126,7 @@ describe('Redux SocketIO Middleware', () => {
 
   /*
     isInitialized
-  */ 
+  */
   describe('.isInitialized', () => {
     describe('when present', () => {
       beforeEach(() => {
@@ -163,6 +165,14 @@ describe('Redux SocketIO Middleware', () => {
       const testClientEvents = ['test', 'test2'];
       middleware.registerSocketEvents('test', testClientEvents, [], []);
       expect(middleware.getSocketEvents('test', middleware.CLIENT_EVENT_KEY)).to.equal(testClientEvents);
+    });
+  });
+
+  describe('.getInitStatus', () => {
+    it('returns the socket status', () => {
+      middleware.SOCKET_INITIALIZED[DEFAULT_ID] = false;
+
+      expect(middleware.getInitStatus(DEFAULT_ID)).to.equal(false);
     });
   });
 
@@ -228,6 +238,21 @@ describe('Redux SocketIO Middleware', () => {
           expect(middleware.isInitialized(DEFAULT_ID)).to.equal(true);
         });
       });
+
+      describe('and the socket is already present', () => {
+
+        it('calls connect on the initialized socket', () => {
+          const testMiddleware = middleware.socketio(mockSocket);
+
+          // initialize / connect
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
+          // reconnect
+          testMiddleware(store)(next)(action);
+
+          expect(mockSocket.connect).to.have.been.called;
+        });
+      });
     });
 
     describe('when the socket is connected', () => {
@@ -247,6 +272,30 @@ describe('Redux SocketIO Middleware', () => {
           testMiddleware(store)(next)({ type: 'TEST' });
 
           expect(event.dispatch).to.have.been.called;
+        });
+      });
+
+      describe('and SocketName_DISCONNECT is called', () => {
+        beforeEach(() => {
+          action = Object.assign({}, action, { payload: { host: 'test', port: 1234 } });
+        });
+
+        it('calls .disconnect on the socket', () => {
+          const testMiddleware = middleware.socketio(mockSocket);
+
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
+
+          expect(mockSocket.disconnect).to.have.been.called;
+        });
+
+        it('sets the status to uninitialized', () => {
+          const testMiddleware = middleware.socketio(mockSocket);
+
+          testMiddleware(store)(next)(action);
+          testMiddleware(store)(next)({ type: `${DEFAULT_ID}_DISCONNECT` });
+
+          expect(middleware.getInitStatus(DEFAULT_ID)).to.equal(false);
         });
       });
     });
