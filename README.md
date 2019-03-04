@@ -80,6 +80,8 @@ export default [
 
 ```
 
+See the [Client Events Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki/%5BClient%5D-Emitting-Events-to-the-Server) for a more detailed usage and simplification.
+
 ### Server Events
 Server events are messages being sent from the server to the client (web browser). This excludes events such as `connect`, `disconnect`, `reconnect`, etc. Following the directory structure mentioned, we place our client events in `middleware/myMiddlewareName/server/`
 
@@ -117,6 +119,8 @@ export default [
 
 ```
 
+See the [Sever Events Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki/%5BServer%5D-Handling-Events-from-the-Server) for a more detailed usage.
+
 ### State Events
 State events are events triggered by socket.io, not by user actions. These include: `connect`, `connect_error`, `connect_timeout`, `reconnect`, `reconnect_attempt`, `reconnecting`, `reconnect_error`, `reconnect_failed`, `disconnect`, and `error`. These follow a similar format to client events, except an additional function must be added to a chain to retain parameters. Following the directory structure mentioned, we place our client events in `middleware/myMiddlewareName/state/`
 
@@ -151,6 +155,8 @@ export default [
 ];
 
 ```
+
+See the [State Events Wiki](https://github.com/Vandise/redux-socket.io-middleware/wiki/%5BState%5D-Handling-Native-Socket.io-Events) for a more detailed usage.
 
 ### Bundling the Middleware
 The last step is to bundle all your actions into a single file for exporting to the store. To simplify our middleware, we can create an `index` file containing all our events.
