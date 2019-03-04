@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rm -rf dist && mkdir dist && babel src --out-dir dist/",
     "test": "mocha --opts spec/mocha.opts ${FILE:-spec}",
-    "doc": "./node_modules/.bin/jsdoc src/index.js -d docs"
+    "doc": "./node_modules/.bin/jsdoc src/index.js src/middleware/client.js src/middleware/server.js -d docs"
   },
   "keywords": [
     "redux",

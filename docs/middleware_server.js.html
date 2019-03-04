@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: middleware/server.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,39 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: middleware/server.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+  * Socketio Redux Middleware Server Event Handler.
+  * @module socketio-middleware/middleware/server
+  */
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+/**
+  * Event handler for server events
+  * @param {array} serverEvents - the user server events list
+  * @param {function} dispatch - the redux dispatch function
+  * @since v0.0.1
+  */
+export default function serverEventHandler(serverEvents, dispatch) {
+  return (event, data) => {
+    serverEvents.some((e) => {
+      if (e.action === event) {
+        e.dispatch(event, data, dispatch);
+        return true;
+      }
+      return false;
+    });
+  };
+}</code></pre>
+        </article>
+    </section>
 
 
 
