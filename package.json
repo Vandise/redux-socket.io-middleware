@@ -19,7 +19,7 @@
     "socketio"
   ],
   "author": "andeb2804@gmail.com",
-  "license": "GNU",
+  "license": "MIT",
   "dependencies": {
     "redux": "^3.0.3",
     "redux-thunk": "^2.1.0",
