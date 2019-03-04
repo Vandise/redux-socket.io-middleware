@@ -8,6 +8,7 @@ import { initialStateEvents } from './state/defaultEvents';
 import { defaultSocketEvents } from './client/defaultEvents';
 import { onSocketEvents } from './client/defaultEvents';
 import serverEventHandler from './middleware/server';
+import clientEventHandler from './middleware/client';
 
 /**
   * The default socket ID when initializing the middleware and no ID is passed
@@ -351,7 +352,7 @@ export function socketio(
         default:
           exports.getSocketEvents(id, CLIENT_EVENT_KEY).some((event) => {
             if (action.type === event.action) {
-              event.dispatch(socket, store, action);
+              clientEventHandler(event, socket, store, action);
               return true;
             }
             return false;

@@ -1,6 +1,6 @@
 {
   "name": "socket.io-middleware",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A socket.io redux middleware wrapper for maintaining multiple socket connections.",
   "main": "dist/index.js",
   "repository": "https://github.com/Vandise/redux-socket.io-middleware",
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "rm -rf dist && mkdir dist && babel src --out-dir dist/",
     "test": "mocha --opts spec/mocha.opts ${FILE:-spec}",
-    "doc": "./node_modules/.bin/jsdoc src/index.js -d docs"
+    "doc": "./node_modules/.bin/jsdoc src/index.js src/middleware/client.js src/middleware/server.js -d docs"
   },
   "keywords": [
     "redux",
@@ -19,7 +19,7 @@
     "socketio"
   ],
   "author": "andeb2804@gmail.com",
-  "license": "GNU",
+  "license": "MIT",
   "dependencies": {
     "redux": "^3.0.3",
     "redux-thunk": "^2.1.0",

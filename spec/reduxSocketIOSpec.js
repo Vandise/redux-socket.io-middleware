@@ -16,7 +16,8 @@ describe('Redux SocketIO Middleware', () => {
       onevent: sinon.spy(),
       on: sinon.spy(),
       disconnect: sinon.spy(),
-      connect: sinon.spy()
+      connect: sinon.spy(),
+      emit: sinon.spy()
     };
 
     mockClient = {
@@ -272,6 +273,18 @@ describe('Redux SocketIO Middleware', () => {
           testMiddleware(store)(next)({ type: 'TEST' });
 
           expect(event.dispatch).to.have.been.called;
+        });
+
+        describe('when the dispatch property is not present', () => {
+          it('calls emit from the default handler', () => {
+            const event = { action: 'TEST' };
+            const testMiddleware = middleware.socketio(mockSocket, [event]);
+
+            testMiddleware(store)(next)(action);
+            testMiddleware(store)(next)({ type: 'TEST' });
+
+            expect(mockSocket.emit).to.have.been.called;
+          });
         });
       });
 
