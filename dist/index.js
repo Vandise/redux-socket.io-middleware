@@ -29,6 +29,10 @@ var _server = require('./middleware/server');
 
 var _server2 = _interopRequireDefault(_server);
 
+var _client = require('./middleware/client');
+
+var _client2 = _interopRequireDefault(_client);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
@@ -38,6 +42,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   * @type {string}
   * @since v1.0.0
   */
+/**
+  * Socketio Redux Middleware.
+  * @module socketio-middleware
+  */
+
 var DEFAULT_SOCKET_ID = exports.DEFAULT_SOCKET_ID = 'DEFAULT';
 
 /**
@@ -47,11 +56,6 @@ var DEFAULT_SOCKET_ID = exports.DEFAULT_SOCKET_ID = 'DEFAULT';
   * @type {string}
   * @since v1.0.0
   */
-/**
-  * Socketio Redux Middleware.
-  * @module socketio-middleware
-  */
-
 var CLIENT_EVENT_KEY = exports.CLIENT_EVENT_KEY = 'client';
 
 /**
@@ -365,7 +369,7 @@ function socketio() {
             default:
               exports.getSocketEvents(id, CLIENT_EVENT_KEY).some(function (event) {
                 if (action.type === event.action) {
-                  event.dispatch(socket, store, action);
+                  (0, _client2.default)(event, socket, store, action);
                   return true;
                 }
                 return false;
