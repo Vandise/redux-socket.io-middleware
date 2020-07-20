@@ -170,7 +170,7 @@ function getSocket(id) {
   * http://localhost:3000/chat
   */
 function generateConnectString(payload) {
-  var connStr = payload.host
+  var connStr = payload.host;
 };
 
 /**
