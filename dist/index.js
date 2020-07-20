@@ -171,6 +171,7 @@ function getSocket(id) {
   */
 function generateConnectString(payload) {
   var connStr = payload.host;
+  return connStr;
 };
 
 /**
