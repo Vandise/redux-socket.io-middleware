@@ -142,10 +142,7 @@ export function getSocket(id) {
   * http://localhost:3000/chat
   */
 export function generateConnectString(payload) {
-  let connStr = `${payload.host}:${payload.port}`;
-  if (payload.namespace) {
-    connStr += `/${payload.namespace}`;
-  }
+  let connStr = `${payload.host}`;
   return connStr;
 };
 
