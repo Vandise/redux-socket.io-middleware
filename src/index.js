@@ -146,6 +146,9 @@ export function generateConnectString(payload) {
   if (payload.namespace) {
     connStr += `/${payload.namespace}`;
   }
+  if (!payload.port) {
+    connStr = `${payload.host}`;
+  }
   return connStr;
 };
 
